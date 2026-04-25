@@ -1,0 +1,65 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Detect which paths changed to conditionally skip builds
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      android: ${{ steps.filter.outputs.android }}
+      ios: ${{ steps.filter.outputs.ios }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            android:
+              - 'packages/app/**'
+              - 'packages/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - '.github/workflows/build-android.yml'
+            ios:
+              - 'packages/app/**'
+              - 'packages/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - '.github/workflows/build-ios.yml'
+
+  # Run tests ONCE for both platforms
+  test:
+    name: Test Application
+    uses: ./.github/workflows/test.yml
+
+  # Build Android only when relevant files changed
+  build-android:
+    name: Build Android
+    needs: [ test, changes ]
+    if: always() && needs.changes.outputs.android == 'true'
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build-android.yml
+    secrets: inherit
+
+  # Build iOS only when relevant files changed
+  build-ios:
+    name: Build iOS
+    needs: [ test, changes ]
+    if: always() && needs.changes.outputs.ios == 'true'
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build-ios.yml
+    secrets: inherit

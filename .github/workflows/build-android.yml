@@ -1,0 +1,209 @@
+name: Build Android FAT
+
+on:
+  workflow_call:
+
+jobs:
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: FAT
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Verify workspace packages
+        run: |
+          echo "=== Workspace symlinks ==="
+          ls -la packages/app/node_modules/@yuhuu/ || echo "No @yuhuu symlinks found"
+          echo "=== @yuhuu/types resolution ==="
+          ls -la packages/app/node_modules/@yuhuu/types/src/ || echo "@yuhuu/types/src not found"
+          echo "=== pnpm workspace packages ==="
+          pnpm list --depth 0 2>/dev/null | grep @yuhuu || echo "No @yuhuu packages in pnpm list"
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Generate Android keystore
+        run: |
+          mkdir -p packages/app/android/app
+          keytool -genkeypair -v -storetype PKCS12 \
+            -keystore packages/app/android/app/release.keystore \
+            -alias yuhuu-key \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass ${{ secrets.KEYSTORE_PASSWORD || 'yuhuu123' }} \
+            -keypass ${{ secrets.KEY_PASSWORD || 'yuhuu123' }} \
+            -dname "CN=Church, OU=Mobile, O=Church, L=Bucharest, ST=Romania, C=RO"
+
+      - name: Validate environment variables
+        run: |
+          if [ -z "${EXPO_PUBLIC_GRAPHQL_URL}" ]; then
+            echo "::error::EXPO_PUBLIC_GRAPHQL_URL is not set. Define FAT_GRAPHQL_URL secret." && exit 1
+          fi
+          if [ -z "${EXPO_PUBLIC_API_URL}" ]; then
+            echo "::error::EXPO_PUBLIC_API_URL is not set. Define EXPO_PUBLIC_API_URL secret." && exit 1
+          fi
+          if [ -z "${EXPO_PUBLIC_AUTH_API_URL}" ]; then
+            echo "::error::EXPO_PUBLIC_AUTH_API_URL is not set. Define EXPO_PUBLIC_AUTH_API_URL secret." && exit 1
+          fi
+          if printf "%s" "$EXPO_PUBLIC_GRAPHQL_URL" | grep -Eq '^http://(localhost|127\.0\.0\.1)'; then
+            echo "::error::Refusing to build release with localhost URL. Set FAT_GRAPHQL_URL to a reachable host." && exit 1
+          fi
+          if printf "%s" "$EXPO_PUBLIC_API_URL" | grep -Eq '^http://(localhost|127\.0\.0\.1)'; then
+            echo "::error::Refusing to build release with localhost URL. Set EXPO_PUBLIC_API_URL to a reachable host." && exit 1
+          fi
+          if printf "%s" "$EXPO_PUBLIC_AUTH_API_URL" | grep -Eq '^http://(localhost|127\.0\.0\.1)'; then
+            echo "::error::Refusing to build release with localhost URL. Set EXPO_PUBLIC_AUTH_API_URL to a reachable host." && exit 1
+          fi
+        env:
+          EXPO_PUBLIC_GRAPHQL_URL: ${{ secrets.FAT_GRAPHQL_URL }}
+          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_AUTH_API_URL: ${{ secrets.EXPO_PUBLIC_AUTH_API_URL }}
+
+      - name: Generate env cache key
+        id: env-cache-key
+        run: |
+          # Hash the environment variables to bust cache when they change
+          ENV_HASH=$(echo "$EXPO_PUBLIC_GRAPHQL_URL$EXPO_PUBLIC_API_URL$EXPO_PUBLIC_AUTH_API_URL$EXPO_PUBLIC_ENV" | sha256sum | cut -d' ' -f1)
+          echo "hash=$ENV_HASH" >> $GITHUB_OUTPUT
+          echo "Environment variables hash: $ENV_HASH"
+        env:
+          EXPO_PUBLIC_GRAPHQL_URL: ${{ secrets.FAT_GRAPHQL_URL }}
+          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_AUTH_API_URL: ${{ secrets.EXPO_PUBLIC_AUTH_API_URL }}
+          EXPO_PUBLIC_ENV: fat
+
+      - name: Cache Android prebuild
+        id: android-prebuild-cache
+        uses: actions/cache@v4
+        with:
+          path: packages/app/android/
+          key: ${{ runner.os }}-android-prebuild-${{ steps.env-cache-key.outputs.hash }}-${{ hashFiles('packages/app/app.config.js', 'packages/app/package.json', 'packages/app/assets/images/**', 'pnpm-lock.yaml') }}
+
+      - name: Prebuild Android
+        if: steps.android-prebuild-cache.outputs.cache-hit != 'true'
+        working-directory: packages/app
+        run: npx expo prebuild --platform android
+        env:
+          EXPO_PUBLIC_GRAPHQL_URL: ${{ secrets.FAT_GRAPHQL_URL }}
+          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_AUTH_API_URL: ${{ secrets.EXPO_PUBLIC_AUTH_API_URL }}
+          EXPO_PUBLIC_ENV: fat
+          REACT_NATIVE_ABIS: arm64-v8a
+
+      - name: Disable Gradle configuration cache (Expo SDK 54 compatibility)
+        run: |
+          echo "# Configuration cache disabled - Expo SDK 54 app/build.gradle uses .execute() which is not config-cache safe" >> packages/app/android/gradle.properties
+          echo "org.gradle.configuration-cache=false" >> packages/app/android/gradle.properties
+
+      - name: Configure Android Signing
+        run: |
+          chmod +x .github/scripts/configure-android-signing.sh
+          .github/scripts/configure-android-signing.sh
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/master' }}
+
+      - name: Build Android Release APK
+        working-directory: packages/app/android
+        run: ./gradlew assembleRelease --info -PreactNativeArchitectures=${{ env.REACT_NATIVE_ABIS }}
+        env:
+          EXPO_PUBLIC_GRAPHQL_URL: ${{ secrets.FAT_GRAPHQL_URL }}
+          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_AUTH_API_URL: ${{ secrets.EXPO_PUBLIC_AUTH_API_URL }}
+          EXPO_PUBLIC_ENV: fat
+          REACT_NATIVE_ABIS: arm64-v8a
+          MYAPP_RELEASE_STORE_FILE: app/release.keystore
+          MYAPP_RELEASE_KEY_ALIAS: yuhuu-key
+          MYAPP_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'yuhuu123' }}
+          MYAPP_RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'yuhuu123' }}
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: yuhuu-fat-release-${{ github.sha }}
+          path: packages/app/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
+
+  deploy:
+    name: Deploy to FAT
+    needs: build-android
+    runs-on: ubuntu-latest
+    environment: FAT
+    permissions:
+      contents: write
+    steps:
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: yuhuu-fat-release-${{ github.sha }}
+
+      - name: Rename APK
+        run: mv app-release.apk yuhuu-fat-${{ github.sha }}.apk
+
+      - name: Create Release Body
+        id: release-body
+        run: |
+          cat << 'EOF' > release-body.md
+          ## FAT Build v${{ github.run_number }} 🚀
+
+          **Branch:** ${{ github.ref_name }}
+          **Commit:** ${{ github.sha }}
+          **Build Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Version:** v${{ github.run_number }}
+
+          ### Download
+          Download the APK file below and install it on your Android device.
+
+          ### Build History
+          See all FAT builds: [Releases](https://github.com/${{ github.repository }}/releases?q=latest-fat-v)
+          EOF
+
+      - name: Create Versioned Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest-fat-v${{ github.run_number }}
+          name: FAT Build v${{ github.run_number }}
+          body_path: release-body.md
+          files: yuhuu-fat-${{ github.sha }}.apk
+          prerelease: true
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy summary
+        run: |
+          echo "## Deployment Results 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ FAT deployment completed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "📱 Environment: FAT" >> $GITHUB_STEP_SUMMARY
+          echo "🔢 Version: v${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "🌐 Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "📦 Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Download:" >> $GITHUB_STEP_SUMMARY
+          echo "- [📥 FAT APK v${{ github.run_number }}](https://github.com/${{ github.repository }}/releases/tag/latest-fat-v${{ github.run_number }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [📜 All FAT Builds](https://github.com/${{ github.repository }}/releases?q=latest-fat-v)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📋 Next steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Download APK v${{ github.run_number }} from the release link above" >> $GITHUB_STEP_SUMMARY
+          echo "2. Test the FAT build on device" >> $GITHUB_STEP_SUMMARY
+          echo "3. Create PR to promote to UAT if tests pass" >> $GITHUB_STEP_SUMMARY

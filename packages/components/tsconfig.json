@@ -1,0 +1,47 @@
+{
+  "extends": "@yuhuu/tsconfig/expo.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "paths": {
+      "@/components/*": [
+        "./src/*"
+      ],
+      "@/hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@/constants/*": [
+        "./src/constants/*"
+      ]
+    }
+  },
+  "references": [
+    {
+      "path": "../auth"
+    },
+    {
+      "path": "../i18n"
+    },
+    {
+      "path": "../storage"
+    },
+    {
+      "path": "../types"
+    }
+  ],
+  "include": [
+    "src/**/*",
+    "nativewind-env.d.ts",
+    "svg.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__"
+  ]
+}
