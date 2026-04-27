@@ -13,6 +13,33 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 
+// Mock @gorhom/bottom-sheet so BottomSheetModal renders its children inline
+// once `present()` is called — lets us interact with the appointment form.
+jest.mock('@gorhom/bottom-sheet', () => {
+    const RealReact = require('react');
+    const RN = require('react-native');
+    return {
+        BottomSheetModal: RealReact.forwardRef(
+            ({ children, testID }: any, ref: any) => {
+                const [visible, setVisible] = RealReact.useState(false);
+                RealReact.useImperativeHandle(ref, () => ({
+                    present: () => setVisible(true),
+                    dismiss: () => setVisible(false),
+                }));
+                if (!visible) return null;
+                return RealReact.createElement(RN.View, { testID }, children);
+            }
+        ),
+        BottomSheetView: ({ children, style }: any) =>
+            require('react').createElement(
+                require('react-native').View,
+                { style },
+                children
+            ),
+        BottomSheetModalProvider: ({ children }: any) => children,
+    };
+});
+
 import { MockAppointmentsRepository } from '@/features/appointments/repository';
 import { AppointmentsCalendarContainer } from '../AppointmentsCalendarContainer';
 
