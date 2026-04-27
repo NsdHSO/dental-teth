@@ -33,6 +33,15 @@ export default function TabLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="appointments"
+          options={{
+            tabBarLabel: t("tabs.appointments"),
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="calendar" color={color} />
+            ),
+          }}
+        />
       </Tabs>
     </>
   );

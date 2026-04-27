@@ -41,10 +41,15 @@ export default function RootLayout() {
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <BottomSheetModalProvider>
-                <ErrorBoundary>
-                    <I18nextProvider i18n={i18n}>
-                        <GlowVariantProvider>
+            <ErrorBoundary>
+                <I18nextProvider i18n={i18n}>
+                    <GlowVariantProvider>
+                        {/*
+                          IMPORTANT: BottomSheetModalProvider portals its children at this
+                          spot in the tree, so any context the modal content needs (i18n,
+                          glow variant, theme, auth, query) MUST be ABOVE this provider.
+                        */}
+                        <BottomSheetModalProvider>
                             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                                 <QueryProvider>
                                     <AuthProvider>
@@ -61,10 +66,10 @@ export default function RootLayout() {
                                     </AuthProvider>
                                 </QueryProvider>
                             </ThemeProvider>
-                        </GlowVariantProvider>
-                    </I18nextProvider>
-                </ErrorBoundary>
-            </BottomSheetModalProvider>
+                        </BottomSheetModalProvider>
+                    </GlowVariantProvider>
+                </I18nextProvider>
+            </ErrorBoundary>
         </GestureHandlerRootView>
     );
 }

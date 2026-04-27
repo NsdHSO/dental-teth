@@ -24,6 +24,7 @@ const MAPPING = {
     'person.crop.circle': 'account-circle',
     'shield.fill': 'admin-panel-settings',
     'map.fill': 'map',
+    'plus': 'add',
 } as IconMapping;
 
 /**
