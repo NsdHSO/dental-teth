@@ -146,4 +146,68 @@ describe('AppointmentsCalendarContainer', () => {
         await waitFor(() => expect(queryByTestId('appointment-form')).toBeNull());
         expect(getByTestId('appointment-add-button')).toBeTruthy();
     });
+
+    it('lets the user submit a free/custom time outside the preset slots', async () => {
+        const { getByTestId, queryByTestId } = renderWithClient(
+            <AppointmentsCalendarContainer
+                repo={repo}
+                initialDate="2026-04-28"
+                testID="ac"
+            />
+        );
+
+        await flush(LATENCY);
+        await waitFor(() => expect(queryByTestId('ac-loading')).toBeNull());
+
+        fireEvent.press(getByTestId('appointment-add-button'));
+        expect(getByTestId('appointment-form')).toBeTruthy();
+
+        // Type a custom time that isn't one of the preset chips.
+        fireEvent.changeText(getByTestId('appointment-form-time-custom'), '13:15');
+        fireEvent.changeText(getByTestId('appointment-form-dentist'), 'Dr. Custom');
+        fireEvent.changeText(getByTestId('appointment-form-reason'), 'Whitening');
+
+        fireEvent.press(getByTestId('appointment-form-submit'));
+
+        await flush(LATENCY);
+        await waitFor(() => expect(createSpy).toHaveBeenCalledTimes(1));
+        expect(createSpy).toHaveBeenCalledWith({
+            date: '2026-04-28',
+            time: '13:15',
+            dentist: 'Dr. Custom',
+            reason: 'Whitening',
+        });
+    });
+
+    it('preset chip overrides a previously typed custom time', async () => {
+        const { getByTestId, queryByTestId } = renderWithClient(
+            <AppointmentsCalendarContainer
+                repo={repo}
+                initialDate="2026-04-28"
+                testID="ac"
+            />
+        );
+
+        await flush(LATENCY);
+        await waitFor(() => expect(queryByTestId('ac-loading')).toBeNull());
+
+        fireEvent.press(getByTestId('appointment-add-button'));
+
+        // Start by typing a free time, then tap a preset chip — the chip wins.
+        fireEvent.changeText(getByTestId('appointment-form-time-custom'), '13:15');
+        fireEvent.press(getByTestId('appointment-form-time-15:00'));
+        fireEvent.changeText(getByTestId('appointment-form-dentist'), 'Dr. Override');
+        fireEvent.changeText(getByTestId('appointment-form-reason'), 'Implant');
+
+        fireEvent.press(getByTestId('appointment-form-submit'));
+
+        await flush(LATENCY);
+        await waitFor(() => expect(createSpy).toHaveBeenCalledTimes(1));
+        expect(createSpy).toHaveBeenCalledWith({
+            date: '2026-04-28',
+            time: '15:00',
+            dentist: 'Dr. Override',
+            reason: 'Implant',
+        });
+    });
 });

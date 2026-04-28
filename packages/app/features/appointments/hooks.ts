@@ -20,8 +20,8 @@ export function useAppointmentsQuery(
     params?: ListAppointmentsParams,
     repo: AppointmentsRepository = defaultAppointmentsRepository
 ) {
-    const {page = 1, limit = 20, date, from, to} = params ?? {};
-    const normalized: ListAppointmentsParams = {page, limit, date, from, to};
+    const {page = 1, limit = 20, date, from, to, dentist_id, status} = params ?? {};
+    const normalized: ListAppointmentsParams = {page, limit, date, from, to, dentist_id, status};
     return useQuery<AppointmentsList>({
         queryKey: QK.list(normalized),
         queryFn: () => repo.list(normalized),

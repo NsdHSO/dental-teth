@@ -1,28 +1,35 @@
-// Domain and transport types for Appointments feature
+export type AppointmentStatus = 'pending' | 'confirmed' | 'cancelled';
 
-// Raw shape returned by the API
 export type AppointmentDto = {
     id: string;
-    date: string;        // YYYY-MM-DD
-    time: string;        // HH:mm
-    dentist: string;
-    reason: string;
+    patient_name: string;
+    patient_phone?: string;
+    patient_email?: string;
+    appointment_date: string;
+    appointment_time: string;
+    dentist_id?: number;
+    duration?: number;
+    reason?: string;
+    status?: AppointmentStatus;
     created_at?: string;
     updated_at?: string;
 };
 
-// Normalized domain model used by the app/UI
 export type Appointment = {
     id: string;
-    date: string;
-    time: string;
-    dentist: string;
-    reason: string;
+    patientName: string;
+    patientPhone?: string;
+    patientEmail?: string;
+    appointmentDate: string;
+    appointmentTime: string;
+    dentistId?: number;
+    duration?: number;
+    reason?: string;
+    status?: AppointmentStatus;
     createdAt?: string;
     updatedAt?: string;
 };
 
-// Pagination envelope used by list endpoints
 export type Pagination = {
     page: number;
     limit: number;
@@ -32,20 +39,23 @@ export type Pagination = {
 
 export type AppointmentsList = { data: Appointment[]; pagination: Pagination };
 
-// Input shapes
 export type AppointmentInput = {
-    date: string;
-    time: string;
-    dentist: string;
-    reason: string;
+    patient_name: string;
+    patient_phone?: string;
+    patient_email?: string;
+    appointment_date: string;
+    appointment_time: string;
+    dentist_id?: number;
+    duration?: number;
+    reason?: string;
 };
 
 export type ListAppointmentsParams = {
     page?: number;
     limit?: number;
-    /** Filter by exact date (YYYY-MM-DD). */
     date?: string;
-    /** Filter by inclusive range (YYYY-MM-DD). */
     from?: string;
     to?: string;
+    dentist_id?: number;
+    status?: AppointmentStatus;
 };

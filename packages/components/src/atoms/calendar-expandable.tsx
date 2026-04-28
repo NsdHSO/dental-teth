@@ -13,6 +13,8 @@ export type AppointmentAgendaItem = {
     time: string;
     dentist: string;
     reason: string;
+    patient_name?: string;
+    status?: 'pending' | 'confirmed' | 'cancelled';
 };
 
 export type CalendarExpandableAtomProps = {

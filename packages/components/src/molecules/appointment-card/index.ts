@@ -1,0 +1,1 @@
+export {AppointmentCard, type AppointmentCardProps} from './AppointmentCard';

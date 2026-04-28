@@ -103,8 +103,11 @@
       "pickTime": "Pick a time",
       "morning": "Morning",
       "afternoon": "Afternoon",
+      "custom": "Custom",
+      "customTimePlaceholder": "HH:mm (e.g. 13:15)",
+      "clearCustomTime": "Clear custom time",
       "invalidDate": "Date must be in YYYY-MM-DD format",
-      "invalidTime": "Pick a time slot",
+      "invalidTime": "Pick a time slot or enter HH:mm",
       "dentistRequired": "Dentist is required",
       "reasonRequired": "Reason is required"
     }

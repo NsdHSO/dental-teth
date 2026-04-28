@@ -103,8 +103,11 @@
       "pickTime": "Alege o or\u0103",
       "morning": "Diminea\u021ba",
       "afternoon": "Dup\u0103-amiaza",
+      "custom": "Personalizat",
+      "customTimePlaceholder": "HH:mm (ex. 13:15)",
+      "clearCustomTime": "\u0218terge ora personalizat\u0103",
       "invalidDate": "Data trebuie s\u0103 fie \u00een format AAAA-LL-ZZ",
-      "invalidTime": "Alege un interval orar",
+      "invalidTime": "Alege un interval sau introdu HH:mm",
       "dentistRequired": "Medicul este obligatoriu",
       "reasonRequired": "Motivul este obligatoriu"
     }

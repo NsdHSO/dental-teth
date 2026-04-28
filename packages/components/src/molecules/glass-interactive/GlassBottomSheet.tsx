@@ -57,6 +57,10 @@ export const GlassBottomSheet = forwardRef<BottomSheetModal, GlassBottomSheetPro
       <BottomSheetModal
         ref={ref}
         snapPoints={snapPoints}
+        // v5 defaults this to true, which forces the sheet to shrink to its
+        // content height and ignore snapPoints. Disable so callers can
+        // explicitly request '60%', '90%', etc. via snapPoints.
+        enableDynamicSizing={false}
         enableDismissOnClose={true}
         onChange={handleSheetChange}
         backdropComponent={(props) => (

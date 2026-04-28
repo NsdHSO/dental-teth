@@ -1,11 +1,11 @@
-import React, { forwardRef } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { GlassBottomSheet } from './glass-interactive/GlassBottomSheet';
-import { ThemedText } from '../themed-text';
-import { LanguagePicker } from './language-picker';
-import { GlowVariantPicker } from './glow-variant-picker';
+import React, { forwardRef } from "react";
+import { StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { GlassBottomSheet } from "./glass-interactive/GlassBottomSheet";
+import { ThemedText } from "../themed-text";
+import { LanguagePicker } from "./language-picker";
+import { GlowVariantPicker } from "./glow-variant-picker";
 
 export type SettingsPanelProps = {
     testID?: string;
@@ -23,24 +23,24 @@ export const SettingsPanel = forwardRef<BottomSheetModal, SettingsPanelProps>(
         return (
             <GlassBottomSheet
                 ref={ref}
-                snapPoints={['60%']}
+                snapPoints={["60%"]}
                 testID={testID ? `${testID}-bottom-sheet` : undefined}
             >
                 <View style={styles.bottomSheetContent}>
                     <ThemedText style={styles.modalTitle}>
-                        {t('avatar.modalTitle')}
+                        {t("avatar.modalTitle")}
                     </ThemedText>
 
                     <View style={styles.body}>
                         <GlowVariantPicker
-                            testID={testID ? `${testID}-glow` : 'settings-glow'}
+                            testID={testID ? `${testID}-glow` : "settings-glow"}
                         />
                         <LanguagePicker />
                     </View>
                 </View>
             </GlassBottomSheet>
         );
-    }
+    },
 );
 
 const styles = StyleSheet.create({
@@ -50,9 +50,9 @@ const styles = StyleSheet.create({
     },
     modalTitle: {
         fontSize: 22,
-        fontWeight: '700',
+        fontWeight: "700",
         marginBottom: 24,
-        textAlign: 'center',
+        textAlign: "center",
     },
     body: {
         gap: 16,
