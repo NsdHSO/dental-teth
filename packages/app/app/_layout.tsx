@@ -1,75 +1,109 @@
 import '@/lib/polyfills';
 import React from 'react';
-import {DarkTheme, DefaultTheme, ThemeProvider} from '@react-navigation/native';
-import {Stack} from 'expo-router';
-import {StatusBar} from 'expo-status-bar';
-import {I18nextProvider} from 'react-i18next';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from '@react-navigation/native';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { I18nextProvider } from 'react-i18next';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import 'react-native-reanimated';
 
-import {useColorScheme} from '@/hooks/use-color-scheme';
-import {AuthProvider} from '@/providers/AuthProvider';
-import {QueryProvider} from '@/providers/QueryProvider';
-import {ErrorBoundary} from '@/components/ErrorBoundary';
-import {i18n, initI18n} from '@yuhuu/i18n';
-import {GlowVariantProvider} from '@yuhuu/components';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { AuthProvider } from '@/providers/AuthProvider';
+import { QueryProvider } from '@/providers/QueryProvider';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { i18n, initI18n } from '@yuhuu/i18n';
+import { GlowVariantProvider } from '@yuhuu/components';
 import './global.css';
 
 export default function RootLayout() {
-    const colorScheme = useColorScheme();
-    const [i18nReady, setI18nReady] = React.useState(false);
+  const colorScheme = useColorScheme();
+  const [i18nReady, setI18nReady] = React.useState(false);
 
-    React.useEffect(() => {
-        initI18n()
-            .then(() => {
-                console.log('[i18n] Initialized successfully');
-                console.log('[i18n] Current language:', i18n.language);
-                console.log('[i18n] Has translations:', i18n.hasResourceBundle('en', 'translation'));
-                setI18nReady(true);
-            })
-            .catch((error) => {
-                console.error('[i18n] Failed to initialize:', error);
-                // Initialize with fallback anyway to prevent app crash
-                setI18nReady(true);
-            });
-    }, []);
+  React.useEffect(() => {
+    initI18n()
+      .then(() => {
+        console.log('[i18n] Initialized successfully');
+        console.log('[i18n] Current language:', i18n.language);
+        console.log(
+          '[i18n] Has translations:',
+          i18n.hasResourceBundle('en', 'translation'),
+        );
+        setI18nReady(true);
+      })
+      .catch((error) => {
+        console.error('[i18n] Failed to initialize:', error);
+        // Initialize with fallback anyway to prevent app crash
+        setI18nReady(true);
+      });
+  }, []);
 
-    if (!i18nReady) {
-        return null;
-    }
+  if (!i18nReady) {
+    return null;
+  }
 
-    return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <ErrorBoundary>
-                <I18nextProvider i18n={i18n}>
-                    <GlowVariantProvider>
-                        {/*
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ErrorBoundary>
+        <I18nextProvider i18n={i18n}>
+          <GlowVariantProvider>
+            {/*
                           IMPORTANT: BottomSheetModalProvider portals its children at this
                           spot in the tree, so any context the modal content needs (i18n,
                           glow variant, theme, auth, query) MUST be ABOVE this provider.
                         */}
-                        <BottomSheetModalProvider>
-                            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                                <QueryProvider>
-                                    <AuthProvider>
-                                        <Stack>
-                                            <Stack.Screen name="index" options={{headerShown: false}}/>
-                                            <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
-                                            {/* (auth) group will be discovered automatically; do not register a non-existent index */}
-                                            <Stack.Screen name="modal" options={{
-                                                presentation: 'modal',
-                                                title: i18n.t('modal.title')
-                                            }}/>
-                                        </Stack>
-                                        <StatusBar style="auto"/>
-                                    </AuthProvider>
-                                </QueryProvider>
-                            </ThemeProvider>
-                        </BottomSheetModalProvider>
-                    </GlowVariantProvider>
-                </I18nextProvider>
-            </ErrorBoundary>
-        </GestureHandlerRootView>
-    );
+            <BottomSheetModalProvider>
+              <ThemeProvider
+                value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+              >
+                <QueryProvider>
+                  <AuthProvider>
+                    <Stack>
+                      <Stack.Screen
+                        name='index'
+                        options={{ headerShown: false }}
+                      />
+                      <Stack.Screen
+                        name='(tabs)'
+                        options={{ headerShown: false }}
+                      />
+                      <Stack.Screen
+                        name='dentists/[id]'
+                        options={{ headerBackTitle: ' ' }}
+                      />
+                      <Stack.Screen
+                        name='patients/[id]'
+                        options={{
+                          headerBackTitle: ' ',
+                        }}
+                      />
+                      <Stack.Screen
+                        name='appointments/[id]'
+                        options={{
+                          headerBackTitle: ' ',
+                        }}
+                      />
+                      {/* (auth) group will be discovered automatically; do not register a non-existent index */}
+                      <Stack.Screen
+                        name='modal'
+                        options={{
+                          presentation: 'modal',
+                          title: i18n.t('modal.title'),
+                        }}
+                      />
+                    </Stack>
+                    <StatusBar style='auto' />
+                  </AuthProvider>
+                </QueryProvider>
+              </ThemeProvider>
+            </BottomSheetModalProvider>
+          </GlowVariantProvider>
+        </I18nextProvider>
+      </ErrorBoundary>
+    </GestureHandlerRootView>
+  );
 }
