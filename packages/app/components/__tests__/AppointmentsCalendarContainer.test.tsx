@@ -13,6 +13,25 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 
+import { MockAppointmentsRepository } from '@/features/appointments/repository';
+import { AppointmentsCalendarContainer } from '../AppointmentsCalendarContainer';
+
+// Mock patient autocomplete hook so the form receives suggestions inline
+jest.mock('@/features/patients/hooks', () => ({
+    usePatientAutocompleteQuery: jest.fn((query: string) => ({
+        data: query.length >= 2
+            ? [{ patientId: 1, fullName: 'John Doe', userId: 1, phone: null, email: null, cnp: null, score: 1 }]
+            : [],
+        isLoading: false,
+    })),
+}));
+
+// Mock react-i18next so useTranslation returns a simple t() that uses fallbacks
+jest.mock('react-i18next', () => ({
+    useTranslation: () => ({ t: (key: string, fallback?: string) => fallback || key }),
+    I18nextProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 // Mock @gorhom/bottom-sheet so BottomSheetModal renders its children inline
 // once `present()` is called — lets us interact with the appointment form.
 jest.mock('@gorhom/bottom-sheet', () => {
@@ -36,12 +55,15 @@ jest.mock('@gorhom/bottom-sheet', () => {
                 { style },
                 children
             ),
+        BottomSheetScrollView: ({ children, style, testID }: any) =>
+            require('react').createElement(
+                require('react-native').ScrollView,
+                { style, testID },
+                children
+            ),
         BottomSheetModalProvider: ({ children }: any) => children,
     };
 });
-
-import { MockAppointmentsRepository } from '@/features/appointments/repository';
-import { AppointmentsCalendarContainer } from '../AppointmentsCalendarContainer';
 
 // react-i18next: use the real provider with empty resources so `t(key, fallback)`
 // returns the fallback string. Avoid mocking i18next entirely.
@@ -122,28 +144,40 @@ describe('AppointmentsCalendarContainer', () => {
 
         // Open the form.
         fireEvent.press(getByTestId('appointment-add-button'));
-        expect(getByTestId('appointment-form')).toBeTruthy();
+        expect(getByTestId('ac-form')).toBeTruthy();
 
-        // Fill in the form. Time is now a chip selector — tap the 11:30 slot.
-        fireEvent.press(getByTestId('appointment-form-time-11:30'));
-        fireEvent.changeText(getByTestId('appointment-form-dentist'), 'Dr. New');
-        fireEvent.changeText(getByTestId('appointment-form-reason'), 'X-Ray');
+        // Fill in the form.
+        // 1. Search and select patient
+        fireEvent.changeText(getByTestId('ac-patient-query'), 'Jo');
+        await flush(0);
+        const suggestion = await waitFor(() => getByTestId('ac-patient-suggestion-0'));
+        fireEvent.press(suggestion);
+
+        // 2. Select time slot
+        fireEvent.press(getByTestId('ac-11:30'));
+
+        // 3. Enter dentist ID
+        fireEvent.changeText(getByTestId('ac-dentist-id'), '2');
+
+        // 4. Enter reason
+        fireEvent.changeText(getByTestId('ac-reason'), 'X-Ray');
 
         // Submit.
-        fireEvent.press(getByTestId('appointment-form-submit'));
+        fireEvent.press(getByTestId('ac-submit'));
 
         // Mutation runs through the simulated latency.
         await flush(LATENCY);
         await waitFor(() => expect(createSpy).toHaveBeenCalledTimes(1));
-        expect(createSpy).toHaveBeenCalledWith({
-            date: '2026-04-28',
-            time: '11:30',
-            dentist: 'Dr. New',
+        expect(createSpy).toHaveBeenCalledWith(expect.objectContaining({
+            patient_id: expect.any(Number),
+            dentist_id: 2,
+            appointment_date: '2026-04-28',
+            appointment_time: '11:30',
             reason: 'X-Ray',
-        });
+        }));
 
         // After success, the inline form should auto-close (back to the add button).
-        await waitFor(() => expect(queryByTestId('appointment-form')).toBeNull());
+        await waitFor(() => expect(queryByTestId('ac-form')).toBeNull());
         expect(getByTestId('appointment-add-button')).toBeTruthy();
     });
 
@@ -160,23 +194,31 @@ describe('AppointmentsCalendarContainer', () => {
         await waitFor(() => expect(queryByTestId('ac-loading')).toBeNull());
 
         fireEvent.press(getByTestId('appointment-add-button'));
-        expect(getByTestId('appointment-form')).toBeTruthy();
+        expect(getByTestId('ac-form')).toBeTruthy();
+
+        // 1. Patient autocomplete
+        fireEvent.changeText(getByTestId('ac-patient-query'), 'Jo');
+        await flush(0);
+        const suggestion2 = await waitFor(() => getByTestId('ac-patient-suggestion-0'));
+        fireEvent.press(suggestion2);
 
         // Type a custom time that isn't one of the preset chips.
-        fireEvent.changeText(getByTestId('appointment-form-time-custom'), '13:15');
-        fireEvent.changeText(getByTestId('appointment-form-dentist'), 'Dr. Custom');
-        fireEvent.changeText(getByTestId('appointment-form-reason'), 'Whitening');
+        fireEvent.changeText(getByTestId('ac-custom'), '13:15');
 
-        fireEvent.press(getByTestId('appointment-form-submit'));
+        // Enter dentist ID
+        fireEvent.changeText(getByTestId('ac-dentist-id'), '3');
+        fireEvent.changeText(getByTestId('ac-reason'), 'Whitening');
+
+        fireEvent.press(getByTestId('ac-submit'));
 
         await flush(LATENCY);
         await waitFor(() => expect(createSpy).toHaveBeenCalledTimes(1));
-        expect(createSpy).toHaveBeenCalledWith({
-            date: '2026-04-28',
-            time: '13:15',
-            dentist: 'Dr. Custom',
+        expect(createSpy).toHaveBeenCalledWith(expect.objectContaining({
+            dentist_id: 3,
+            appointment_date: '2026-04-28',
+            appointment_time: '13:15',
             reason: 'Whitening',
-        });
+        }));
     });
 
     it('preset chip overrides a previously typed custom time', async () => {
@@ -193,21 +235,28 @@ describe('AppointmentsCalendarContainer', () => {
 
         fireEvent.press(getByTestId('appointment-add-button'));
 
-        // Start by typing a free time, then tap a preset chip — the chip wins.
-        fireEvent.changeText(getByTestId('appointment-form-time-custom'), '13:15');
-        fireEvent.press(getByTestId('appointment-form-time-15:00'));
-        fireEvent.changeText(getByTestId('appointment-form-dentist'), 'Dr. Override');
-        fireEvent.changeText(getByTestId('appointment-form-reason'), 'Implant');
+        // Select patient first
+        fireEvent.changeText(getByTestId('ac-patient-query'), 'Jo');
+        await flush(0);
+        const suggestion3 = await waitFor(() => getByTestId('ac-patient-suggestion-0'));
+        fireEvent.press(suggestion3);
 
-        fireEvent.press(getByTestId('appointment-form-submit'));
+        // Start by typing a free time, then tap a preset chip — the chip wins.
+        fireEvent.changeText(getByTestId('ac-custom'), '13:15');
+        fireEvent.press(getByTestId('ac-15:00'));
+
+        fireEvent.changeText(getByTestId('ac-dentist-id'), '4');
+        fireEvent.changeText(getByTestId('ac-reason'), 'Implant');
+
+        fireEvent.press(getByTestId('ac-submit'));
 
         await flush(LATENCY);
         await waitFor(() => expect(createSpy).toHaveBeenCalledTimes(1));
-        expect(createSpy).toHaveBeenCalledWith({
-            date: '2026-04-28',
-            time: '15:00',
-            dentist: 'Dr. Override',
+        expect(createSpy).toHaveBeenCalledWith(expect.objectContaining({
+            dentist_id: 4,
+            appointment_date: '2026-04-28',
+            appointment_time: '15:00',
             reason: 'Implant',
-        });
+        }));
     });
 });
