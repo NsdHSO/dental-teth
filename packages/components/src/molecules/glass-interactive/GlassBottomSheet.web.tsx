@@ -74,11 +74,12 @@ export const GlassBottomSheet = forwardRef<any, GlassBottomSheetProps>(
         animationType="none"
         onRequestClose={handleBackdropPress}
       >
-        <Pressable
-          style={styles.backdrop}
-          onPress={handleBackdropPress}
-          testID={testID ? `${testID}-backdrop` : undefined}
-        >
+        <View style={styles.container}>
+          <Pressable
+            style={styles.backdrop}
+            onPress={handleBackdropPress}
+            testID={testID ? `${testID}-backdrop` : undefined}
+          />
           <RNAnimated.View
             style={[
               styles.bottomSheet,
@@ -93,20 +94,22 @@ export const GlassBottomSheet = forwardRef<any, GlassBottomSheetProps>(
                 ],
               },
             ]}
-            onStartShouldSetResponder={() => true}
+            pointerEvents="box-none"
           >
-            <GlassBottomSheetBackground
-              variant={variant}
-              enableWaves={enableWaves}
-              activeColor={activeColor}
-              colorScheme={scheme}
-              testID={testID ? `${testID}-background` : undefined}
-            >
-              <GlassHandle />
-              {children}
-            </GlassBottomSheetBackground>
+            <View style={styles.sheetContent} pointerEvents="auto">
+              <GlassBottomSheetBackground
+                variant={variant}
+                enableWaves={enableWaves}
+                activeColor={activeColor}
+                colorScheme={scheme}
+                testID={testID ? `${testID}-background` : undefined}
+              >
+                <GlassHandle />
+                {children}
+              </GlassBottomSheetBackground>
+            </View>
           </RNAnimated.View>
-        </Pressable>
+        </View>
       </Modal>
     );
   }
@@ -135,13 +138,22 @@ const GlassHandle: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  backdrop: {
+  container: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)', // Reduced from 0.4 to 0.2 for lighter backdrop
     justifyContent: 'flex-end',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
   },
   bottomSheet: {
     maxHeight: '80%',
+    width: '100%',
+    position: 'relative',
+    zIndex: 1,
+  },
+  sheetContent: {
+    width: '100%',
   },
   glassContainer: {
     borderTopLeftRadius: 24,
