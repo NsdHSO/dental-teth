@@ -151,6 +151,11 @@
     "locationPlaceholder": "Location (optional)",
     "maxParticipantsPlaceholder": "Max participants (optional)"
   },
+  "dentists": {
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "noResults": "No dentists found"
+  },
   "home": {
     "title": "Home",
     "welcome": "Welcome, {{name}}!",
@@ -221,9 +226,12 @@
     "notesPlaceholder": "Notes (optional)",
     "adding": "Adding\u2026",
     "addParticipant": "Add Participant",
-    "creating": "Creating..."
+    "creating": "Creating...",
+    "back": "Back",
+    "confirm": "Confirm",
+    "retry": "Retry"
   },
-  "common": {
+  "skills": {
     "title": "🎯 Skills & Talents",
     "deleteTitle": "Delete Skill",
     "deleteMessage": "Remove {{skillName}}?",
@@ -275,7 +283,9 @@
     "visits": "Visits",
     "supper": "Supper",
     "profile": "Profile",
-    "appointments": "Appointments"
+    "appointments": "Appointments",
+    "patients": "Patients",
+    "dentists": "Dentists"
   },
   "visits": {
     "title": "Visits",
