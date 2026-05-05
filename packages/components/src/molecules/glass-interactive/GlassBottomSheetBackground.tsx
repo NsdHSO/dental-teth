@@ -128,7 +128,7 @@ export const GlassBottomSheetBackground: React.FC<GlassBottomSheetBackgroundProp
       <Animated.View
         style={[style, styles.glassContainer, containerStyle, containerAnimatedStyle]}
         testID={testID}
-        pointerEvents="none"
+        pointerEvents="auto"
       >
         {/* Subtle glow tint overlay */}
         <View
