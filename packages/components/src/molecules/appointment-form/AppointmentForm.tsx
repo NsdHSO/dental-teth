@@ -1,45 +1,131 @@
-import React from 'react';
-import {View} from 'react-native';
-import {useTranslation} from 'react-i18next';
-import {GlassCard} from '../glass-interactive/GlassCard';
-import {GlassInput} from '../glass-content/GlassInput';
-import {ThemedText} from '../../themed-text';
-import {PatientFields} from './PatientFields';
-import {DurationPicker} from './DurationPicker';
-import {DentistSelector} from './DentistSelector';
-import {FormActions} from './FormActions';
-import {useAppointmentForm, type CreateAppointmentInput} from './useAppointmentForm';
-import {TimePicker} from './TimePicker';
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { useTranslation } from 'react-i18next';
+import { Platform, ScrollView, View } from 'react-native';
+import { useState } from 'react';
+import { ThemedText } from '../../themed-text';
+import { GlassInput } from '../glass-content/GlassInput';
+import { DentistSelector } from './DentistSelector';
+import { DurationPicker } from './DurationPicker';
+import { FormActions } from './FormActions';
+import { PatientFields, type PatientSuggestion } from './PatientFields';
+import { TimePicker } from './TimePicker';
+import {
+  useAppointmentForm,
+  type CreateAppointmentInput,
+} from './useAppointmentForm';
 
 export type AppointmentFormProps = {
-    initialDate?: string;
-    onSubmit: (data: CreateAppointmentInput) => void;
-    onCancel: () => void;
-    isSubmitting?: boolean;
-    testID?: string;
+  initialDate?: string;
+  onSubmit: (data: CreateAppointmentInput) => void;
+  onCancel: () => void;
+  isSubmitting?: boolean;
+  patientSuggestions?: PatientSuggestion[];
+  patientSuggestionsLoading?: boolean;
+  onPatientQueryChange?: (q: string) => void;
+  testID?: string;
 };
 
-export function AppointmentForm({initialDate = '', onSubmit, onCancel, isSubmitting = false, testID}: AppointmentFormProps) {
-    const {t} = useTranslation();
-    const form = useAppointmentForm({initialDate, onSubmit});
+export function AppointmentForm({
+  initialDate = '',
+  onSubmit,
+  onCancel,
+  isSubmitting = false,
+  patientSuggestions = [],
+  patientSuggestionsLoading = false,
+  onPatientQueryChange,
+  testID,
+}: AppointmentFormProps) {
+  const { t } = useTranslation();
+  const form = useAppointmentForm({ initialDate, onSubmit });
+  const [patientQuery, setPatientQuery] = useState('');
 
-    return (
-        <View testID={testID} style={{padding: 16}}>
-            <GlassCard variant="frosted" borderRadius={20}>
-                <ThemedText type="subtitle" style={{marginBottom: 16}}>{t('appointments.form.title', 'New appointment')}</ThemedText>
-                <PatientFields name={form.patientName} phone={form.patientPhone} email={form.patientEmail}
-                    onNameChange={form.setPatientName} onPhoneChange={form.setPatientPhone} onEmailChange={form.setPatientEmail}
-                    disabled={isSubmitting} testID={testID} />
-                <View style={{marginTop: 16}}>
-                    <TimePicker value={form.time} customTime={form.customTime} showCustomError={form.showCustomError}
-                        onPickSlot={form.pickSlot} onCustomTimeChange={form.setCustomTimeValue} onClearCustomTime={form.clearCustomTime}
-                        disabled={isSubmitting} testID={testID} />
-                </View>
-                <View style={{marginTop: 16}}><DurationPicker value={form.duration} onChange={form.setDuration} disabled={isSubmitting} testID={testID} /></View>
-                <View style={{marginTop: 16}}><DentistSelector value={form.dentistId} onChange={form.setDentistId} disabled={isSubmitting} testID={testID} /></View>
-                <View style={{marginTop: 16}}><GlassInput value={form.reason} onChangeText={form.setReason} placeholder={t('appointments.form.reasonPlaceholder', 'Reason')} editable={!isSubmitting} variant="tinted" multiline numberOfLines={2} testID={testID} /></View>
-                <FormActions onCancel={onCancel} onSubmit={form.submit} isSubmitting={isSubmitting} testID={testID} />
-            </GlassCard>
-        </View>
-    );
+  const handlePatientQueryChange = (v: string) => {
+    setPatientQuery(v);
+    onPatientQueryChange?.(v);
+    if (form.selectedPatientId) {
+      form.setSelectedPatientId(undefined);
+    }
+  };
+
+  const handlePatientSelect = (id: number) => {
+    if (id === 0) {
+      form.setSelectedPatientId(undefined);
+      setPatientQuery('');
+    } else {
+      form.setSelectedPatientId(id);
+      const found = patientSuggestions.find((s) => s.id === id);
+      setPatientQuery(found?.label ?? String(id));
+    }
+  };
+
+  const FormScrollView =
+    Platform.OS === 'web' ? ScrollView : BottomSheetScrollView;
+
+  return (
+    <FormScrollView
+      testID={testID ? `${testID}-form` : 'appointment-form'}
+      style={{ flex: 1, padding: Platform.OS === 'web' ? 8 : 0 }}
+      keyboardShouldPersistTaps='handled'
+    >
+      <ThemedText type='subtitle' style={{ marginBottom: 16 }}>
+        {t('appointments.form.title', 'New appointment')}
+      </ThemedText>
+      <PatientFields
+        query={patientQuery}
+        onQueryChange={handlePatientQueryChange}
+        results={patientSuggestions}
+        selectedId={form.selectedPatientId}
+        onSelect={handlePatientSelect}
+        loading={patientSuggestionsLoading}
+        disabled={isSubmitting}
+        testID={testID}
+      />
+      <View style={{ marginTop: 16 }}>
+        <TimePicker
+          value={form.time}
+          customTime={form.customTime}
+          showCustomError={form.showCustomError}
+          onPickSlot={form.pickSlot}
+          onCustomTimeChange={form.setCustomTimeValue}
+          onClearCustomTime={form.clearCustomTime}
+          disabled={isSubmitting}
+          testID={testID}
+        />
+      </View>
+      <View style={{ marginTop: 16 }}>
+        <DurationPicker
+          value={form.duration}
+          onChange={form.setDuration}
+          disabled={isSubmitting}
+          testID={testID}
+        />
+      </View>
+      <View style={{ marginTop: 16 }}>
+        <DentistSelector
+          dentistId={form.dentistId}
+          onDentistIdChange={form.setDentistId}
+          disabled={isSubmitting}
+          testID={testID}
+        />
+      </View>
+      <View style={{ marginTop: 16 }}>
+        <GlassInput
+          value={form.reason}
+          onChangeText={form.setReason}
+          placeholder={t('appointments.form.reasonPlaceholder', 'Reason')}
+          editable={!isSubmitting}
+          variant='tinted'
+          multiline
+          numberOfLines={2}
+          testID={testID ? `${testID}-reason` : undefined}
+        />
+      </View>
+      <FormActions
+        onCancel={onCancel}
+        onSubmit={form.submit}
+        isSubmitting={isSubmitting}
+        testID={testID}
+      />
+    </FormScrollView>
+  );
 }

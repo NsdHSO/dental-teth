@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View, ScrollView } from "react-native";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useTranslation } from "react-i18next";
 import { useColorScheme } from "../../hooks/use-color-scheme";
 import { Colors } from "../../constants/theme";
@@ -9,12 +10,13 @@ import { GlassInput } from "../glass-content/GlassInput";
 import { GlassCard } from "../glass-interactive/GlassCard";
 import { ThemedText } from "../../themed-text";
 import { TimePicker } from "./TimePicker";
+import { PatientFields, type PatientSuggestion } from "./PatientFields";
 import {
     type CreateAppointmentInput,
     useAppointmentForm,
 } from "./useAppointmentForm";
 
-export type { CreateAppointmentInput };
+export type { CreateAppointmentInput, PatientSuggestion };
 
 export type AppointmentFormProps = {
     initialDate?: string;
@@ -22,22 +24,21 @@ export type AppointmentFormProps = {
     onCancel: () => void;
     isSubmitting?: boolean;
     timeSlots?: string[];
+    patientSuggestions?: PatientSuggestion[];
+    patientSuggestionsLoading?: boolean;
+    onPatientQueryChange?: (q: string) => void;
     testID?: string;
 };
 
-/**
- * Orchestrator: composes the form-state hook with the dumb sub-views.
- * Stays small (~ a hundred lines) because each concern lives elsewhere:
- *   - state/validation/i18n  \u2192 useAppointmentForm
- *   - time selection UX      \u2192 TimePicker
- *   - regexes/formatting     \u2192 validation.ts
- */
 export function AppointmentForm({
     initialDate = "",
     onSubmit,
     onCancel,
     isSubmitting = false,
     timeSlots,
+    patientSuggestions = [],
+    patientSuggestionsLoading = false,
+    onPatientQueryChange,
     testID,
 }: AppointmentFormProps) {
     const { t } = useTranslation();
@@ -47,20 +48,52 @@ export function AppointmentForm({
     const activeColor = getGlowColor(glowVariant, scheme);
 
     const form = useAppointmentForm({ initialDate, onSubmit });
+    const [patientQuery, setPatientQuery] = React.useState("");
+
+    const handlePatientQueryChange = (v: string) => {
+        setPatientQuery(v);
+        onPatientQueryChange?.(v);
+        if (form.selectedPatientId) {
+            form.setSelectedPatientId(undefined);
+        }
+    };
+
+    const handlePatientSelect = (id: number) => {
+        if (id === 0) {
+            form.setSelectedPatientId(undefined);
+            setPatientQuery("");
+        } else {
+            form.setSelectedPatientId(id);
+            const found = patientSuggestions.find((s) => s.id === id);
+            setPatientQuery(found?.label ?? String(id));
+        }
+    };
 
     const labelColor = scheme === "dark" ? "#9CA3AF" : "#6B7280";
     const mutedBorder = scheme === "dark" ? "#4B5563" : "#94A3B8";
     const dateChipBg = `${activeColor}${scheme === "dark" ? "33" : "1A"}`;
 
+    const FormScrollView = Platform.OS === "web" ? ScrollView : BottomSheetScrollView;
+
     return (
-        <View testID={testID} style={styles.outer}>
+        <FormScrollView testID={testID} style={styles.outer} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
             <GlassCard variant="frosted" borderRadius={20} style={styles.card}>
                 <View style={styles.cardInner}>
                     <ThemedText type="subtitle" style={styles.cardTitle}>
                         {t("appointments.form.title", "New appointment")}
                     </ThemedText>
 
-                    {/* Date (read-only) */}
+                    <PatientFields
+                        query={patientQuery}
+                        onQueryChange={handlePatientQueryChange}
+                        results={patientSuggestions}
+                        selectedId={form.selectedPatientId}
+                        onSelect={handlePatientSelect}
+                        loading={patientSuggestionsLoading}
+                        disabled={isSubmitting}
+                        testID={testID}
+                    />
+
                     <Field
                         label={t("appointments.selectDate", "Date")}
                         labelColor={labelColor}
@@ -81,7 +114,6 @@ export function AppointmentForm({
                         </View>
                     </Field>
 
-                    {/* Time */}
                     <View style={styles.field}>
                         <TimePicker
                             value={form.time}
@@ -96,22 +128,21 @@ export function AppointmentForm({
                         />
                     </View>
 
-                    {/* Dentist */}
                     <Field
-                        label={t("appointments.selectDentist", "Dentist")}
+                        label={t("appointments.dentistId", "Dentist ID")}
                         labelColor={labelColor}
                     >
                         <GlassInput
-                            value={form.dentist}
-                            onChangeText={form.setDentist}
-                            placeholder={t("appointments.form.dentistPlaceholder", "Dentist")}
+                            value={form.dentistId}
+                            onChangeText={form.setDentistId}
+                            placeholder={t("appointments.form.dentistIdPlaceholder", "Dentist ID")}
+                            keyboardType="number-pad"
                             editable={!isSubmitting}
                             variant="tinted"
-                            testID={testID ? `${testID}-dentist` : undefined}
+                            testID={testID ? `${testID}-dentist-id` : undefined}
                         />
                     </Field>
 
-                    {/* Reason */}
                     <Field
                         label={t("appointments.reason", "Reason")}
                         labelColor={labelColor}
@@ -129,7 +160,6 @@ export function AppointmentForm({
                         />
                     </Field>
 
-                    {/* Buttons */}
                     <View style={styles.buttonRow}>
                         <FormButton
                             label={t("common.cancel")}
@@ -156,11 +186,9 @@ export function AppointmentForm({
                     </View>
                 </View>
             </GlassCard>
-        </View>
+        </FormScrollView>
     );
 }
-
-// ---------- Tiny private sub-components ----------
 
 function Field({
     label,
@@ -239,6 +267,9 @@ function FormButton({
 
 const styles = StyleSheet.create({
     outer: {
+        flex: 1,
+    },
+    scrollContent: {
         paddingHorizontal: 2,
         paddingVertical: 2,
     },

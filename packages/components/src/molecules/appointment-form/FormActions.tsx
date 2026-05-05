@@ -1,6 +1,9 @@
 import React from 'react';
 import {View, Pressable, Text} from 'react-native';
 import {useTranslation} from 'react-i18next';
+import {useColorScheme} from '../../hooks/use-color-scheme';
+import {useGlowVariant} from '../../hooks/useGlowVariant';
+import {getGlowColor} from '../../constants/glowColors';
 
 export type FormActionsProps = {
     onCancel: () => void;
@@ -11,12 +14,16 @@ export type FormActionsProps = {
 
 export function FormActions({onCancel, onSubmit, isSubmitting = false, testID}: FormActionsProps) {
     const {t} = useTranslation();
+    const scheme = useColorScheme() ?? 'light';
+    const {glowVariant} = useGlowVariant();
+    const accentColor = getGlowColor(glowVariant, scheme);
 
     return (
         <View testID={testID} style={{flexDirection: 'row', gap: 12, marginTop: 24}}>
             <Pressable
                 onPress={onCancel}
                 disabled={isSubmitting}
+                testID={testID ? `${testID}-cancel` : undefined}
                 style={{
                     flex: 1,
                     paddingVertical: 14,
@@ -33,11 +40,12 @@ export function FormActions({onCancel, onSubmit, isSubmitting = false, testID}: 
             <Pressable
                 onPress={onSubmit}
                 disabled={isSubmitting}
+                testID={testID ? `${testID}-submit` : undefined}
                 style={{
                     flex: 1,
                     paddingVertical: 14,
                     borderRadius: 12,
-                    backgroundColor: isSubmitting ? '#94A3B8' : '#6366F1',
+                    backgroundColor: isSubmitting ? '#94A3B8' : accentColor,
                     alignItems: 'center',
                 }}
             >

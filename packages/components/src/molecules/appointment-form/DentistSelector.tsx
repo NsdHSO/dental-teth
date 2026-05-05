@@ -1,35 +1,30 @@
 import React from 'react';
-import {View, Text} from 'react-native';
-import {useTranslation} from 'react-i18next';
+import {View} from 'react-native';
 import {ThemedText} from '../../themed-text';
+import {GlassInput} from '../glass-content/GlassInput';
 
 export type DentistSelectorProps = {
-    value?: number;
-    onChange: (dentistId: number | undefined) => void;
+    dentistId: string;
+    onDentistIdChange: (v: string) => void;
     disabled?: boolean;
     testID?: string;
 };
 
-export function DentistSelector({value, onChange, disabled, testID}: DentistSelectorProps) {
-    const {t} = useTranslation();
-
+export function DentistSelector({dentistId, onDentistIdChange, disabled, testID}: DentistSelectorProps) {
     return (
-        <View testID={testID}>
-            <ThemedText size="xs" weight="600" style={{marginBottom: 4, color: '#6B7280'}}>
-                DENTIST
+        <View testID={testID} style={{gap: 12}}>
+            <ThemedText size="xs" weight="semibold" style={{marginBottom: 4, color: '#6B7280'}}>
+                DENTIST ID *
             </ThemedText>
-            <View style={{
-                paddingHorizontal: 12,
-                paddingVertical: 10,
-                borderRadius: 8,
-                backgroundColor: '#F3F4F6',
-                borderWidth: 1,
-                borderColor: '#D1D5DB',
-            }}>
-                <Text style={{color: '#9CA3AF', fontSize: 15}}>
-                    {t('appointments.dentistComingSoon', 'Coming soon')}
-                </Text>
-            </View>
+            <GlassInput
+                value={dentistId}
+                onChangeText={onDentistIdChange}
+                placeholder="Dentist ID"
+                keyboardType="number-pad"
+                editable={!disabled}
+                variant="tinted"
+                testID={testID ? `${testID}-dentist-id` : undefined}
+            />
         </View>
     );
 }

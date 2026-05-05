@@ -6,10 +6,8 @@ import {autoFormatTime, isValidDate, isValidTime} from './validation';
 export type CreateAppointmentInput = {
     date: string;
     time: string;
-    patient_name: string;
-    patient_phone?: string;
-    patient_email?: string;
-    dentist_id?: number;
+    patient_id: number;
+    dentist_id: number;
     duration?: number;
     reason?: string;
 };
@@ -28,10 +26,8 @@ export function useAppointmentForm({
     const [date] = useState(initialDate);
     const [time, setTime] = useState('');
     const [customTime, setCustomTime] = useState('');
-    const [patientName, setPatientName] = useState('');
-    const [patientPhone, setPatientPhone] = useState('');
-    const [patientEmail, setPatientEmail] = useState('');
-    const [dentistId, setDentistId] = useState<number | undefined>();
+    const [selectedPatientId, setSelectedPatientId] = useState<number | undefined>();
+    const [dentistId, setDentistId] = useState('');
     const [duration, setDuration] = useState(30);
     const [reason, setReason] = useState('');
 
@@ -57,10 +53,8 @@ export function useAppointmentForm({
     const reset = useCallback(() => {
         setTime('');
         setCustomTime('');
-        setPatientName('');
-        setPatientPhone('');
-        setPatientEmail('');
-        setDentistId(undefined);
+        setSelectedPatientId(undefined);
+        setDentistId('');
         setDuration(30);
         setReason('');
     }, []);
@@ -68,8 +62,7 @@ export function useAppointmentForm({
     const submit = useCallback(() => {
         const trimmedDate = date.trim();
         const trimmedTime = time.trim();
-        const trimmedPatientName = patientName.trim();
-        const trimmedReason = reason.trim();
+        const parsedDentistId = Number(dentistId.trim());
 
         if (!isValidDate(trimmedDate)) {
             Alert.alert(t('common.error'), t('appointments.form.invalidDate', 'Date must be YYYY-MM-DD'));
@@ -79,31 +72,31 @@ export function useAppointmentForm({
             Alert.alert(t('common.error'), t('appointments.form.invalidTime', 'Pick a time slot or enter HH:mm'));
             return;
         }
-        if (!trimmedPatientName) {
-            Alert.alert(t('common.error'), t('appointments.form.patientNameRequired', 'Patient name is required'));
+        if (!selectedPatientId || selectedPatientId <= 0) {
+            Alert.alert(t('common.error'), t('appointments.form.patientRequired', 'Patient is required'));
+            return;
+        }
+        if (!Number.isFinite(parsedDentistId) || parsedDentistId <= 0) {
+            Alert.alert(t('common.error'), t('appointments.form.dentistIdRequired', 'Dentist ID is required'));
             return;
         }
 
         onSubmit({
             date: trimmedDate,
             time: trimmedTime,
-            patient_name: trimmedPatientName,
-            patient_phone: patientPhone.trim() || undefined,
-            patient_email: patientEmail.trim() || undefined,
-            dentist_id: dentistId,
+            patient_id: selectedPatientId,
+            dentist_id: parsedDentistId,
             duration: duration,
-            reason: trimmedReason || undefined,
+            reason: reason.trim() || undefined,
         });
         reset();
-    }, [date, time, patientName, patientPhone, patientEmail, dentistId, duration, reason, t, onSubmit, reset]);
+    }, [date, time, selectedPatientId, dentistId, duration, reason, t, onSubmit, reset]);
 
     return {
         date, time, customTime,
-        patientName, patientPhone, patientEmail,
-        dentistId, duration, reason,
+        selectedPatientId, dentistId, duration, reason,
         showCustomError,
-        setPatientName, setPatientPhone, setPatientEmail,
-        setDentistId, setDuration, setReason,
+        setSelectedPatientId, setDentistId, setDuration, setReason,
         pickSlot, setCustomTimeValue, clearCustomTime, submit,
     };
 }
