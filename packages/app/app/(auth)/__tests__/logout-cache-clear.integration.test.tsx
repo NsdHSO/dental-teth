@@ -160,13 +160,13 @@ describe('Logout Cache Clear Integration Test', () => {
                 username: 'john_doe'
             },
         ]);
-        testQueryClient.setQueryData(['bootstrap'], {env: 'test'});
+        testQueryClient.setQueryData(['user-profile', 'seeded'], true);
 
         // Verify all queries are cached
         expect(testQueryClient.getQueryData(['roles', 'me'])).toBeDefined();
         expect(testQueryClient.getQueryData(['dinners', 'by-date', '2026-02-27'])).toBeDefined();
         expect(testQueryClient.getQueryData(['participants', 'by-dinner', 10])).toBeDefined();
-        expect(testQueryClient.getQueryData(['bootstrap'])).toBeDefined();
+        expect(testQueryClient.getQueryData(['user-profile', 'seeded'])).toBeDefined();
 
         // When: User logs out (clear all cache)
         testQueryClient.clear();
@@ -175,7 +175,7 @@ describe('Logout Cache Clear Integration Test', () => {
         expect(testQueryClient.getQueryData(['roles', 'me'])).toBeUndefined();
         expect(testQueryClient.getQueryData(['dinners', 'by-date', '2026-02-27'])).toBeUndefined();
         expect(testQueryClient.getQueryData(['participants', 'by-dinner', 10])).toBeUndefined();
-        expect(testQueryClient.getQueryData(['bootstrap'])).toBeUndefined();
+        expect(testQueryClient.getQueryData(['user-profile', 'seeded'])).toBeUndefined();
     });
 
     it('should handle logout → login → logout → login cycle correctly', async () => {
