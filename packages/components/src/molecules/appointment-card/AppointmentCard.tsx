@@ -22,7 +22,7 @@ export function AppointmentCard({id, patientName, time, reason, status, testID}:
     return (
         <GlassCard testID={testID} variant="tinted" borderRadius={12} enableElectric={true} enableWaves={true}
             style={{borderLeftWidth: 4, borderLeftColor: colors.tint, padding: 16, marginBottom: 12, flexDirection: 'row', gap: 16}}>
-            <View style={{minWidth: 60}}><ThemedText type="subtitle" weight="700">{time}</ThemedText></View>
+            <View style={{minWidth: 60}}><ThemedText type="subtitle" weight="bold">{time}</ThemedText></View>
             <View style={{flex: 1}}>
                 <ThemedText type="default" weight="semibold">{patientName}</ThemedText>
                 {reason && <ThemedText type="default" style={{opacity: 0.7, marginTop: 4}}>{reason}</ThemedText>}
