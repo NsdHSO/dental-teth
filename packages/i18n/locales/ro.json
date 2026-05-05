@@ -221,7 +221,10 @@
     "notesPlaceholder": "Note (op\u021bional)",
     "adding": "Se adaug\u0103\u2026",
     "addParticipant": "Adaug\u0103 participant",
-    "creating": "Se creaz\u0103..."
+    "creating": "Se creaz\u0103...",
+    "back": "\u00cenapoi",
+    "confirm": "Confirm\u0103",
+    "retry": "Re\u00eencercare"
   },
   "skills": {
     "title": "🎯 Abilit\u0103\u021bi & Talente",
@@ -265,6 +268,11 @@
       "skillNameRequired": "Numele abilit\u0103\u021bii este obligatoriu"
     }
   },
+  "dentists": {
+    "available": "Disponibil",
+    "unavailable": "Indisponibil",
+    "noResults": "Nu s-au g\u0103sit medici"
+  },
   "modal": {
     "title": "Aceasta este o fereastr\u0103 modal\u0103",
     "goHome": "Mergi la ecranul principal"
@@ -275,7 +283,9 @@
     "visits": "Vizite",
     "supper": "Cin\u0103",
     "profile": "Profil",
-    "appointments": "Program\u0103ri"
+    "appointments": "Program\u0103ri",
+    "patients": "Pacien\u021bi",
+    "dentists": "Medici"
   },
   "visits": {
     "title": "Vizite",
