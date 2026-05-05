@@ -134,16 +134,17 @@ describe('appointments hooks (mock repository + fake timers)', () => {
         const create = renderHook(() => useCreateAppointmentMutation(fastRepo), {wrapper});
         act(() => {
             create.result.current.mutate({
-                date: '2026-04-29',
-                time: '11:00',
-                dentist: 'Dr. New',
+                appointment_date: '2026-04-29',
+                appointment_time: '11:00',
+                patient_id: 99,
+                dentist_id: 42,
                 reason: 'Consult',
             });
         });
 
         await waitFor(() => expect(create.result.current.isSuccess).toBe(true));
         await waitFor(() => expect(list.result.current.data?.data).toHaveLength(4));
-        expect(list.result.current.data?.data.find((a) => a.dentist === 'Dr. New')).toBeDefined();
+        expect(list.result.current.data?.data.find((a) => a.dentist === 'Dentist #42')).toBeDefined();
     });
 
     it('update mutation patches an appointment', async () => {
