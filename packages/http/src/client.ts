@@ -13,6 +13,19 @@ export function createHttpClient(baseURL: string, opts?: CreateHttpClientOptions
         applyEnvelopeUnwrapper(instance);
     }
 
+    instance.interceptors.response.use(
+        (r) => r,
+        (error: AxiosError) => {
+            const status = error.response?.status ?? 0;
+            const url = error.config?.url ?? 'unknown';
+            const method = error.config?.method?.toUpperCase() ?? 'UNKNOWN';
+            if (status >= 500) {
+                console.error(`[HTTP ${status}] ${method} ${url}`, error.message);
+            }
+            return Promise.reject(error);
+        }
+    );
+
     return instance;
 }
 
