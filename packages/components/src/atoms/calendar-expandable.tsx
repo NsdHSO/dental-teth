@@ -14,13 +14,14 @@ export type AppointmentAgendaItem = {
     dentist: string;
     reason: string;
     patient_name?: string;
-    status?: 'pending' | 'confirmed' | 'cancelled';
+    status?: 'scheduled' | 'completed' | 'cancelled';
 };
 
 export type CalendarExpandableAtomProps = {
     selectedDate: string;
     onDateSelect: (date: string) => void;
     appointments: AppointmentAgendaItem[];
+    onAppointmentPress?: (appointment: AppointmentAgendaItem) => void;
     testID?: string;
 };
 
@@ -30,6 +31,7 @@ export function CalendarExpandableAtom({
     selectedDate = '',
     onDateSelect,
     appointments = [],
+    onAppointmentPress,
     testID
 }: CalendarExpandableAtomProps) {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -86,7 +88,7 @@ export function CalendarExpandableAtom({
     const renderItem = useCallback(({ item }: { item: AgendaItem }) => {
         if (!item) return null;
         return (
-            <View style={styles.itemContainer}>
+            <Pressable onPress={() => onAppointmentPress?.(item)} style={styles.itemContainer}>
                 <GlassCard
                     variant="tinted"
                     borderRadius={12}
@@ -108,28 +110,28 @@ export function CalendarExpandableAtom({
                         </ThemedText>
                     </View>
                 </GlassCard>
-            </View>
+            </Pressable>
         );
-    }, [tintColor]);
+    }, [tintColor, onAppointmentPress]);
 
     // AgendaList passes the section title (string) to renderSectionHeader, not the section object.
     // The wider SectionList type expects `(info: { section }) => ...`, so we widen via `any`.
     const renderSectionHeader = useCallback((title: any) => {
         const text = typeof title === 'string' ? title : title?.section?.title ?? '';
         return (
-            <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
+            <View style={styles.sectionHeader}>
                 <ThemedText type="subtitle">
                     {text}
                 </ThemedText>
             </View>
         );
-    }, [colors.background]);
+    }, []);
 
     return (
         <View testID={testID} style={styles.container}>
             <Pressable
                 onPress={toggleExpanded}
-                style={[styles.header, { backgroundColor: colors.background }]}
+                style={styles.header}
             >
                 <View style={styles.headerContent}>
                     <ThemedText type="subtitle">
@@ -144,7 +146,7 @@ export function CalendarExpandableAtom({
             </Pressable>
 
             {isExpanded && (
-                <View style={[styles.calendarContainer, { backgroundColor: colors.background }]}>
+                <View style={styles.calendarContainer}>
                     <Calendar
                         onDayPress={handleDayPress}
                         markedDates={markedDates}
