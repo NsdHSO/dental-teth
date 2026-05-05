@@ -144,6 +144,19 @@ jest.mock('react-native-reanimated', () => {
     return Reanimated;
 });
 
+// Mock react-native-safe-area-context
+jest.mock('react-native-safe-area-context', () => {
+    const React = require('react');
+    const { View } = require('react-native');
+    return {
+        SafeAreaView: React.forwardRef(({ children, style, ...props }, ref) =>
+            React.createElement(View, { ref, style, ...props }, children)
+        ),
+        SafeAreaProvider: ({ children }) => children,
+        useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+    };
+});
+
 // Mock @react-navigation/elements
 // Keep this mock free of any out-of-scope imports (like react-native)
 // to comply with Jest's mock factory restrictions.
