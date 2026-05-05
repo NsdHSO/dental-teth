@@ -6,6 +6,9 @@
   "files": [
     "index.js"
   ],
+  "dependencies": {
+    "eslint-plugin-unused-imports": "^4.1.4"
+  },
   "peerDependencies": {
     "eslint": "^9.0.0",
     "eslint-config-expo": "~10.0.0"

@@ -1,5 +1,6 @@
 const {defineConfig} = require("eslint/config");
 const expoConfig = require("eslint-config-expo/flat");
+const unusedImports = require("eslint-plugin-unused-imports");
 
 module.exports = defineConfig([
     ...expoConfig,
@@ -7,17 +8,23 @@ module.exports = defineConfig([
         ignores: ["dist/*", "node_modules/*"],
     },
     {
+        plugins: {
+            "unused-imports": unusedImports,
+        },
         rules: {
             // Disable import/no-unresolved for workspace packages - TypeScript handles this
             "import/no-unresolved": ["error", {
                 ignore: ["^@yuhuu/"]
             }],
-            "@typescript-eslint/no-unused-vars": [
+            "@typescript-eslint/no-unused-vars": "off",
+            "unused-imports/no-unused-imports": "error",
+            "unused-imports/no-unused-vars": [
                 "warn",
                 {
-                    argsIgnorePattern: "^_",
+                    vars: "all",
                     varsIgnorePattern: "^_",
-                    caughtErrorsIgnorePattern: "^_",
+                    args: "after-used",
+                    argsIgnorePattern: "^_",
                 },
             ],
         },
