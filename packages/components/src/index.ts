@@ -39,8 +39,6 @@ export * from './atoms/gender-avatar';
 export * from './atoms/user-avatar';
 export * from './atoms/SubmitButton';
 export * from './atoms/status-badge';
-export * from './atoms/duration-picker';
-export * from './atoms/dentist-selector';
 export * from './atoms/patient-inputs';
 export * from './atoms/time-field';
 
