@@ -1,12 +1,14 @@
 import React, { useMemo, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "expo-router";
 
 import {
     AppointmentsCalendarOrganism,
     ThemedText,
     type AppointmentAgendaItem,
     type CreateAppointmentInput,
+    type PatientSuggestion,
 } from "@yuhuu/components";
 
 import {
@@ -18,6 +20,7 @@ import {
     type AppointmentInput,
 } from "@/features/appointments/types";
 import { type AppointmentsRepository } from "@/features/appointments/repository";
+import { usePatientAutocompleteQuery } from "@/features/patients/hooks";
 
 export type AppointmentsCalendarContainerProps = {
     /** Optional repository (defaults to the feature's default). Useful for tests/mocks. */
@@ -32,15 +35,19 @@ function toAgendaItem(a: Appointment): AppointmentAgendaItem {
         date: a.date,
         time: a.time,
         dentist: a.dentist,
-        reason: a.reason,
+        reason: a.reason ?? "",
+        patient_name: a.patient.fullName ?? a.dentist,
+        status: undefined,
     };
 }
 
 function toAppointmentInput(input: CreateAppointmentInput): AppointmentInput {
     return {
-        date: input.date,
-        time: input.time,
-        dentist: input.dentist,
+        patient_id: input.patient_id,
+        dentist_id: input.dentist_id,
+        appointment_date: input.date,
+        appointment_time: input.time,
+        duration: input.duration,
         reason: input.reason,
     };
 }
@@ -56,19 +63,32 @@ export function AppointmentsCalendarContainer({
     testID = "appointments-calendar",
 }: AppointmentsCalendarContainerProps) {
     const { t } = useTranslation();
+    const router = useRouter();
     const [selectedDate, setSelectedDate] = useState<string>(
         initialDate ?? new Date().toISOString().split("T")[0]
     );
+    const [patientQuery, setPatientQuery] = useState("");
 
     const { data, isLoading, isError, refetch } = useAppointmentsQuery(
         { limit: 100 },
         repo
     );
     const createMutation = useCreateAppointmentMutation(repo);
+    const { data: patientResults, isLoading: patientsLoading } =
+        usePatientAutocompleteQuery(patientQuery);
 
     const appointments = useMemo<AppointmentAgendaItem[]>(
         () => (data?.data ?? []).map(toAgendaItem),
         [data]
+    );
+
+    const patientSuggestions: PatientSuggestion[] = useMemo(
+        () =>
+            (patientResults ?? []).map((p) => ({
+                id: p.patientId,
+                label: p.fullName ?? `Patient #${p.patientId}`,
+            })),
+        [patientResults]
     );
 
     const handleCreate = (input: CreateAppointmentInput) => {
@@ -76,8 +96,13 @@ export function AppointmentsCalendarContainer({
             onSuccess: () => {
                 // Jump the agenda to the date we just created an appointment on.
                 setSelectedDate(input.date);
+                setPatientQuery("");
             },
         });
+    };
+
+    const handleAppointmentPress = (item: AppointmentAgendaItem) => {
+        router.push(`/appointments/${item.id}`);
     };
 
     if (isLoading) {
@@ -95,7 +120,7 @@ export function AppointmentsCalendarContainer({
                     {t("common.error", "Something went wrong")}
                 </ThemedText>
                 <ThemedText
-                    onPress={() => refetch()}
+                    onPress={() => { refetch().catch(() => {}); }}
                     style={styles.retry}
                     type="link"
                 >
@@ -111,6 +136,10 @@ export function AppointmentsCalendarContainer({
             selectedDate={selectedDate}
             onDateSelect={setSelectedDate}
             onCreateAppointment={handleCreate}
+            onAppointmentPress={handleAppointmentPress}
+            patientSuggestions={patientSuggestions}
+            patientSuggestionsLoading={patientsLoading}
+            onPatientQueryChange={setPatientQuery}
             isCreating={createMutation.isPending}
             testID={testID}
         />
