@@ -3,7 +3,6 @@ import {View, StyleSheet, Platform} from 'react-native';
 import {
   BottomSheetModal,
   BottomSheetBackdropProps,
-  BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import Animated, {
   useAnimatedStyle,
@@ -87,12 +86,9 @@ export const GlassBottomSheet = forwardRef<BottomSheetModal, GlassBottomSheetPro
         android_keyboardInputMode="adjustResize"
         waitFor={Platform.OS === 'android' ? undefined : undefined}
       >
-        <BottomSheetView
-          key={`content-${glowVariant}-${scheme}`}
-          style={styles.contentContainer}
-        >
+        <View style={styles.contentContainer}>
           {children}
-        </BottomSheetView>
+        </View>
       </BottomSheetModal>
     );
   }
