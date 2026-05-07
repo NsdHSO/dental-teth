@@ -11,9 +11,9 @@ if ! grep -q "signingConfigs" "$GRADLE_FILE"; then
     signingConfigs {\
         release {\
             storeFile file(System.getenv("MYAPP_RELEASE_STORE_FILE") ?: "release.keystore")\
-            storePassword System.getenv("MYAPP_RELEASE_STORE_PASSWORD") ?: "yuhuu123"\
-            keyAlias System.getenv("MYAPP_RELEASE_KEY_ALIAS") ?: "yuhuu-key"\
-            keyPassword System.getenv("MYAPP_RELEASE_KEY_PASSWORD") ?: "yuhuu123"\
+            storePassword System.getenv("MYAPP_RELEASE_STORE_PASSWORD") ?: "dental123"\
+            keyAlias System.getenv("MYAPP_RELEASE_KEY_ALIAS") ?: "dental-key"\
+            keyPassword System.getenv("MYAPP_RELEASE_KEY_PASSWORD") ?: "dental123"\
         }\
     }' "$GRADLE_FILE"
 
