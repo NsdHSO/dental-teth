@@ -15,7 +15,7 @@ import {
   GlassCard,
   IconSymbol,
   ThemedText,
-} from '@yuhuu/components';
+} from '@dental/components';
 import { usePatientQuery } from '@/features/patients/hooks';
 import { useAppointmentsQuery } from '@/features/appointments/hooks';
 import {
