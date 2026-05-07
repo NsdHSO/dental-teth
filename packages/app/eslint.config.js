@@ -1,17 +1,17 @@
-const eslintConfig = require('@yuhuu/eslint-config');
+const eslintConfig = require('@dental/eslint-config');
 
 module.exports = [
-    ...eslintConfig,
-    {
-        files: [
-            '**/__tests__/**/*.{ts,tsx,js,jsx}',
-            '**/*.test.{ts,tsx,js,jsx}',
-            '**/*.spec.{ts,tsx,js,jsx}',
-            '**/jest.setup.{ts,js}',
-            '**/__mocks__/**/*.{ts,tsx,js,jsx}',
-        ],
-        rules: {
-            '@typescript-eslint/no-require-imports': 'off',
-        },
+  ...eslintConfig,
+  {
+    files: [
+      '**/__tests__/**/*.{ts,tsx,js,jsx}',
+      '**/*.test.{ts,tsx,js,jsx}',
+      '**/*.spec.{ts,tsx,js,jsx}',
+      '**/jest.setup.{ts,js}',
+      '**/__mocks__/**/*.{ts,tsx,js,jsx}',
+    ],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
     },
+  },
 ];
