@@ -16,8 +16,8 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { i18n, initI18n } from '@yuhuu/i18n';
-import { GlowVariantProvider } from '@yuhuu/components';
+import { i18n, initI18n } from '@dental/i18n';
+import { GlowVariantProvider } from '@dental/components';
 import './global.css';
 
 export default function RootLayout() {

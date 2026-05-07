@@ -7,7 +7,7 @@ import {
   CustomTabBar,
   IconSymbol,
   useColorScheme,
-} from '@yuhuu/components';
+} from '@dental/components';
 
 export default function TabLayout() {
   const { t } = useTranslation();

@@ -44,7 +44,7 @@ For **full confidence**, we need **End-to-End tests** that:
 **Maestro** (recommended for React Native):
 ```yaml
 # e2e/admin-tab-hidden.yaml
-appId: com.anonymous.yuhuu
+appId: com.anonymous.dental
 ---
 # Test: Non-admin users should NOT see Admin tab
 - launchApp
