@@ -1,21 +1,21 @@
-import React, {useMemo} from 'react';
-import {StyleSheet} from 'react-native';
-import {Picker} from '@react-native-picker/picker';
-import {useTranslation} from 'react-i18next';
-import {useColorScheme} from '../hooks/use-color-scheme';
-import {Colors} from '../constants/theme';
-import type {Dinner} from '@yuhuu/types';
+import React, { useMemo } from 'react';
+import { StyleSheet } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import { useTranslation } from 'react-i18next';
+import { useColorScheme } from '../hooks/use-color-scheme';
+import { Colors } from '../constants/theme';
+import type { Dinner } from '@dental/types';
 
 /**
  * Props for DinnerSelector component
  */
 export type DinnerSelectorProps = {
-    /** Array of available dinners */
-    dinners: Dinner[];
-    /** Currently selected dinner ID, or null */
-    selectedDinnerId: number | null;
-    /** Callback when dinner selection changes */
-    onSelectDinner: (dinnerId: number) => void;
+  /** Array of available dinners */
+  dinners: Dinner[];
+  /** Currently selected dinner ID, or null */
+  selectedDinnerId: number | null;
+  /** Callback when dinner selection changes */
+  onSelectDinner: (dinnerId: number) => void;
 };
 
 /**
@@ -32,62 +32,63 @@ export type DinnerSelectorProps = {
  * - Displays meal type and location for clarity
  */
 export function DinnerSelector({
-                                   dinners,
-                                   selectedDinnerId,
-                                   onSelectDinner,
-                               }: DinnerSelectorProps) {
-    const {t} = useTranslation();
-    const scheme = useColorScheme() ?? 'light';
+  dinners,
+  selectedDinnerId,
+  onSelectDinner,
+}: DinnerSelectorProps) {
+  const { t } = useTranslation();
+  const scheme = useColorScheme() ?? 'light';
 
-    // Auto-select if only one dinner and nothing selected yet
-    React.useEffect(() => {
-        if (dinners.length === 1 && selectedDinnerId === null) {
-            onSelectDinner(dinners[0].id);
-        }
-    }, [dinners, selectedDinnerId, onSelectDinner]);
-
-    // IMPORTANT: useMemo must be called before early return to follow hooks rules
-    const pickerStyle = useMemo(
-        () => ({
-            backgroundColor: scheme === 'dark' ? '#1F2937' : '#fff',
-            color: Colors[scheme].text,
-        }),
-        [scheme]
-    );
-
-    // If no dinners or only one dinner, no need to show dropdown
-    if (dinners.length <= 1) {
-        return null;
+  // Auto-select if only one dinner and nothing selected yet
+  React.useEffect(() => {
+    if (dinners.length === 1 && selectedDinnerId === null) {
+      onSelectDinner(dinners[0].id);
     }
+  }, [dinners, selectedDinnerId, onSelectDinner]);
 
-    return (
-        <Picker
-            selectedValue={selectedDinnerId}
-            onValueChange={(value) => {
-                if (value !== null && value !== undefined) {
-                    // Convert to number to ensure type consistency
-                    const dinnerId = typeof value === 'string' ? parseInt(value, 10) : value;
-                    onSelectDinner(dinnerId);
-                }
-            }}
-            style={[styles.picker, pickerStyle]}
-        >
-            <Picker.Item label={t('supper.selectDinnerPlaceholder')} value={null}/>
-            {dinners.map((dinner) => (
-                <Picker.Item
-                    key={dinner.id}
-                    label={`${dinner.mealType} - ${dinner.location || dinner.description || t('supper.dinnerFallback')}`}
-                    value={dinner.id}
-                />
-            ))}
-        </Picker>
-    );
+  // IMPORTANT: useMemo must be called before early return to follow hooks rules
+  const pickerStyle = useMemo(
+    () => ({
+      backgroundColor: scheme === 'dark' ? '#1F2937' : '#fff',
+      color: Colors[scheme].text,
+    }),
+    [scheme],
+  );
+
+  // If no dinners or only one dinner, no need to show dropdown
+  if (dinners.length <= 1) {
+    return null;
+  }
+
+  return (
+    <Picker
+      selectedValue={selectedDinnerId}
+      onValueChange={(value) => {
+        if (value !== null && value !== undefined) {
+          // Convert to number to ensure type consistency
+          const dinnerId =
+            typeof value === 'string' ? parseInt(value, 10) : value;
+          onSelectDinner(dinnerId);
+        }
+      }}
+      style={[styles.picker, pickerStyle]}
+    >
+      <Picker.Item label={t('supper.selectDinnerPlaceholder')} value={null} />
+      {dinners.map((dinner) => (
+        <Picker.Item
+          key={dinner.id}
+          label={`${dinner.mealType} - ${dinner.location || dinner.description || t('supper.dinnerFallback')}`}
+          value={dinner.id}
+        />
+      ))}
+    </Picker>
+  );
 }
 
 const styles = StyleSheet.create({
-    picker: {
-        marginVertical: 12,
-        borderWidth: 1,
-        borderRadius: 8,
-    },
+  picker: {
+    marginVertical: 12,
+    borderWidth: 1,
+    borderRadius: 8,
+  },
 });
