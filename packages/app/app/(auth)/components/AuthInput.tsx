@@ -1,14 +1,18 @@
 import React from 'react';
-import {TextInput, TextInputProps, View} from 'react-native';
-import {useColorScheme} from '@yuhuu/components';
-import {getInputStyles} from '../styles/input-styles';
+import { TextInput, TextInputProps, View } from 'react-native';
+import { useColorScheme } from '@dental/components';
+import { getInputStyles } from '../styles/input-styles';
 
 interface AuthInputProps extends TextInputProps {
   inputRef?: React.RefObject<View | null>;
   onFocusCallback?: () => void;
 }
 
-export function AuthInput({inputRef, onFocusCallback, ...props}: AuthInputProps) {
+export function AuthInput({
+  inputRef,
+  onFocusCallback,
+  ...props
+}: AuthInputProps) {
   const scheme = useColorScheme() ?? 'light';
   const inputStyles = getInputStyles(scheme);
 

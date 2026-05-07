@@ -1,21 +1,32 @@
-import React, {useState} from 'react';
-import {TextInput, TextInputProps, View, Pressable, StyleSheet} from 'react-native';
+import React, { useState } from 'react';
+import {
+  TextInput,
+  TextInputProps,
+  View,
+  Pressable,
+  StyleSheet,
+} from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import {useColorScheme} from '@yuhuu/components';
-import {getInputStyles} from '../styles/input-styles';
+import { useColorScheme } from '@dental/components';
+import { getInputStyles } from '../styles/input-styles';
 
 interface PasswordInputProps extends Omit<TextInputProps, 'secureTextEntry'> {
   inputRef?: React.RefObject<View | null>;
   onFocusCallback?: () => void;
 }
 
-export function PasswordInput({inputRef, onFocusCallback, testID, ...props}: PasswordInputProps) {
+export function PasswordInput({
+  inputRef,
+  onFocusCallback,
+  testID,
+  ...props
+}: PasswordInputProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const scheme = useColorScheme() ?? 'light';
   const inputStyles = getInputStyles(scheme);
 
   const togglePasswordVisibility = () => {
-    setIsPasswordVisible(prev => !prev);
+    setIsPasswordVisible((prev) => !prev);
   };
 
   const iconColor = scheme === 'dark' ? '#9CA3AF' : '#6B7280';
