@@ -1,6 +1,6 @@
 const base = require('../../jest.config.base');
 
 module.exports = {
-    ...base,
-    displayName: '@yuhuu/http',
+  ...base,
+  displayName: '@dental/http',
 };
