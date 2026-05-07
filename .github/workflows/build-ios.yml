@@ -130,8 +130,8 @@ jobs:
           EXPO_PUBLIC_ENV: fat
         run: |
           export PATH="/opt/homebrew/opt/ccache/libexec:$PATH"
-          xcodebuild -workspace Yuhuu.xcworkspace \
-            -scheme Yuhuu \
+          xcodebuild -workspace Dental.xcworkspace \
+            -scheme Dental \
             -configuration Release \
             -sdk iphoneos \
             -derivedDataPath build \
@@ -159,17 +159,17 @@ jobs:
           cp -r "$APP_PATH" Payload/
 
           # Create IPA
-          zip -r Yuhuu.ipa Payload
+          zip -r Dental.ipa Payload
 
           # Move IPA to build directory
           mkdir -p build/ipa
-          mv Yuhuu.ipa build/ipa/
+          mv Dental.ipa build/ipa/
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: yuhuu-fat-ios-${{ github.sha }}
-          path: packages/app/ios/build/ipa/Yuhuu.ipa
+          name: dental-fat-ios-${{ github.sha }}
+          path: packages/app/ios/build/ipa/Dental.ipa
           retention-days: 30
 
   deploy:
@@ -183,10 +183,10 @@ jobs:
       - name: Download IPA
         uses: actions/download-artifact@v4
         with:
-          name: yuhuu-fat-ios-${{ github.sha }}
+          name: dental-fat-ios-${{ github.sha }}
 
       - name: Rename IPA
-        run: mv Yuhuu.ipa yuhuu-fat-ios-${{ github.sha }}.ipa
+        run: mv Dental.ipa dental-fat-ios-${{ github.sha }}.ipa
 
       - name: Create Release Body
         id: release-body
@@ -211,7 +211,7 @@ jobs:
           tag_name: latest-fat-ios
           name: Latest iOS FAT Build
           body_path: release-body.md
-          files: yuhuu-fat-ios-${{ github.sha }}.ipa
+          files: dental-fat-ios-${{ github.sha }}.ipa
           prerelease: true
           draft: false
         env:
