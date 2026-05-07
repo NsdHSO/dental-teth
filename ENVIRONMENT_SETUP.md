@@ -1,6 +1,6 @@
 # Environment Setup Guide
 
-Complete guide to setting up your development environment for the Yuhuu boilerplate.
+Complete guide to setting up your development environment for the Dental boilerplate.
 
 ## Prerequisites
 
