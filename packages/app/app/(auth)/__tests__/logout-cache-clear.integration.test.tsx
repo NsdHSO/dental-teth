@@ -1,7 +1,7 @@
 import React from 'react';
-import {render, waitFor} from '@testing-library/react-native';
-import {QueryClient} from '@tanstack/react-query';
-import {AuthProvider} from '@/providers/AuthProvider';
+import { render, waitFor } from '@testing-library/react-native';
+import { QueryClient } from '@tanstack/react-query';
+import { AuthProvider } from '@/providers/AuthProvider';
 
 /**
  * Integration test for logout cache clearing
@@ -23,337 +23,384 @@ import {AuthProvider} from '@/providers/AuthProvider';
 
 // Mock dependencies
 const mockAuthApi = {
-    post: jest.fn(),
+  post: jest.fn(),
 };
 
 const mockAppApi = {
-    get: jest.fn(),
-    post: jest.fn(),
+  get: jest.fn(),
+  post: jest.fn(),
 };
 
-jest.mock('@yuhuu/auth', () => ({
-    authApi: mockAuthApi,
-    appApi: mockAppApi,
-    clearTokens: jest.fn(),
-    getValidAccessToken: jest.fn(),
-    setTokensFromLogin: jest.fn(),
-    redirectToLogin: jest.fn(),
-    clearBiometricData: jest.fn(),
-    clearBiometricEmail: jest.fn(),
-    authenticateWithBiometrics: jest.fn(),
-    getBiometricEmail: jest.fn(),
-    refreshAccessToken: jest.fn(),
+jest.mock('@dental/auth', () => ({
+  authApi: mockAuthApi,
+  appApi: mockAppApi,
+  clearTokens: jest.fn(),
+  getValidAccessToken: jest.fn(),
+  setTokensFromLogin: jest.fn(),
+  redirectToLogin: jest.fn(),
+  clearBiometricData: jest.fn(),
+  clearBiometricEmail: jest.fn(),
+  authenticateWithBiometrics: jest.fn(),
+  getBiometricEmail: jest.fn(),
+  refreshAccessToken: jest.fn(),
 }));
 
 describe('Logout Cache Clear Integration Test', () => {
-    let testQueryClient: QueryClient;
+  let testQueryClient: QueryClient;
 
-    beforeEach(() => {
-        jest.clearAllMocks();
+  beforeEach(() => {
+    jest.clearAllMocks();
 
-        // Create fresh QueryClient for each test
-        testQueryClient = new QueryClient({
-            defaultOptions: {
-                queries: {
-                    retry: false,
-                    gcTime: 0,
-                },
-            },
-        });
-
-        // Mock getValidAccessToken to return null (not logged in)
-        const {getValidAccessToken} = require('@/lib/tokenManager');
-        getValidAccessToken.mockResolvedValue(null);
+    // Create fresh QueryClient for each test
+    testQueryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+          gcTime: 0,
+        },
+      },
     });
 
-    afterEach(() => {
-        testQueryClient.clear();
+    // Mock getValidAccessToken to return null (not logged in)
+    const { getValidAccessToken } = require('@/lib/tokenManager');
+    getValidAccessToken.mockResolvedValue(null);
+  });
+
+  afterEach(() => {
+    testQueryClient.clear();
+  });
+
+  it('should clear cached roles when user logs out', async () => {
+    // Given: Admin user is logged in with cached roles
+    const adminRoles = [
+      {
+        role_name: 'Admin',
+        role_id: 1,
+      },
+      {
+        role_name: 'Member',
+        role_id: 2,
+      },
+    ];
+
+    // Set cached roles in query client
+    testQueryClient.setQueryData(['roles', 'me'], adminRoles);
+
+    // Verify cache has admin roles
+    const cachedRoles = testQueryClient.getQueryData(['roles', 'me']);
+    expect(cachedRoles).toEqual(adminRoles);
+
+    // When: User logs out
+    testQueryClient.clear();
+
+    // Then: Cache should be completely cleared
+    const rolesAfterLogout = testQueryClient.getQueryData(['roles', 'me']);
+    expect(rolesAfterLogout).toBeUndefined();
+  });
+
+  it('should NOT show Admin tab for Member user after Admin logout', async () => {
+    // This test verifies cache clearing at the QueryClient level
+    // Full integration with AuthProvider is tested in the last test
+
+    // Step 1: Admin user - set admin roles in cache
+    const adminRoles = [
+      {
+        role_name: 'Admin',
+        role_id: 1,
+      },
+      {
+        role_name: 'Member',
+        role_id: 2,
+      },
+    ];
+
+    testQueryClient.setQueryData(['roles', 'me'], adminRoles);
+
+    // Verify admin roles are in cache
+    expect(testQueryClient.getQueryData(['roles', 'me'])).toEqual(adminRoles);
+
+    // Step 2: Logout - clear cache
+    testQueryClient.clear();
+
+    // Verify cache is cleared
+    expect(testQueryClient.getQueryData(['roles', 'me'])).toBeUndefined();
+
+    // Step 3: Member user logs in - set member roles
+    const memberRoles = [
+      {
+        role_name: 'Member',
+        role_id: 2,
+      },
+    ];
+    testQueryClient.setQueryData(['roles', 'me'], memberRoles);
+
+    // Verify only member roles in cache (no admin roles leaked)
+    const currentRoles = testQueryClient.getQueryData(['roles', 'me']);
+    expect(currentRoles).toEqual(memberRoles);
+    expect(currentRoles).not.toEqual(adminRoles);
+  });
+
+  it('should clear all cached queries on logout', async () => {
+    // Given: Multiple cached queries
+    testQueryClient.setQueryData(
+      ['roles', 'me'],
+      [
+        {
+          role_name: 'Admin',
+          role_id: 1,
+        },
+      ],
+    );
+    testQueryClient.setQueryData(
+      ['dinners', 'by-date', '2026-02-27'],
+      [
+        {
+          id: 1,
+          dinnerDate: '2026-02-27',
+        },
+      ],
+    );
+    testQueryClient.setQueryData(
+      ['participants', 'by-dinner', 10],
+      [
+        {
+          id: 1,
+          username: 'john_doe',
+        },
+      ],
+    );
+    testQueryClient.setQueryData(['user-profile', 'seeded'], true);
+
+    // Verify all queries are cached
+    expect(testQueryClient.getQueryData(['roles', 'me'])).toBeDefined();
+    expect(
+      testQueryClient.getQueryData(['dinners', 'by-date', '2026-02-27']),
+    ).toBeDefined();
+    expect(
+      testQueryClient.getQueryData(['participants', 'by-dinner', 10]),
+    ).toBeDefined();
+    expect(
+      testQueryClient.getQueryData(['user-profile', 'seeded']),
+    ).toBeDefined();
+
+    // When: User logs out (clear all cache)
+    testQueryClient.clear();
+
+    // Then: All queries should be cleared
+    expect(testQueryClient.getQueryData(['roles', 'me'])).toBeUndefined();
+    expect(
+      testQueryClient.getQueryData(['dinners', 'by-date', '2026-02-27']),
+    ).toBeUndefined();
+    expect(
+      testQueryClient.getQueryData(['participants', 'by-dinner', 10]),
+    ).toBeUndefined();
+    expect(
+      testQueryClient.getQueryData(['user-profile', 'seeded']),
+    ).toBeUndefined();
+  });
+
+  it('should handle logout → login → logout → login cycle correctly', async () => {
+    // Cycle 1: Admin login
+    const adminRoles = [
+      {
+        role_name: 'Admin',
+        role_id: 1,
+      },
+    ];
+    testQueryClient.setQueryData(['roles', 'me'], adminRoles);
+    testQueryClient.setQueryData(['user-data'], { userId: 'admin-123' });
+
+    expect(testQueryClient.getQueryData(['roles', 'me'])).toEqual(adminRoles);
+
+    // Logout 1
+    testQueryClient.clear();
+    expect(testQueryClient.getQueryData(['roles', 'me'])).toBeUndefined();
+    expect(testQueryClient.getQueryData(['user-data'])).toBeUndefined();
+
+    // Cycle 2: Member login
+    const memberRoles = [
+      {
+        role_name: 'Member',
+        role_id: 2,
+      },
+    ];
+    testQueryClient.setQueryData(['roles', 'me'], memberRoles);
+    testQueryClient.setQueryData(['user-data'], { userId: 'member-456' });
+
+    expect(testQueryClient.getQueryData(['roles', 'me'])).toEqual(memberRoles);
+    expect(testQueryClient.getQueryData(['user-data'])).toEqual({
+      userId: 'member-456',
     });
 
-    it('should clear cached roles when user logs out', async () => {
-        // Given: Admin user is logged in with cached roles
-        const adminRoles = [
-            {
-                role_name: 'Admin',
-                role_id: 1
-            },
-            {
-                role_name: 'Member',
-                role_id: 2
-            },
-        ];
+    // Logout 2
+    testQueryClient.clear();
+    expect(testQueryClient.getQueryData(['roles', 'me'])).toBeUndefined();
+    expect(testQueryClient.getQueryData(['user-data'])).toBeUndefined();
 
-        // Set cached roles in query client
-        testQueryClient.setQueryData(['roles', 'me'], adminRoles);
+    // Cycle 3: Admin login again
+    testQueryClient.setQueryData(['roles', 'me'], adminRoles);
+    testQueryClient.setQueryData(['user-data'], { userId: 'admin-789' });
 
-        // Verify cache has admin roles
-        const cachedRoles = testQueryClient.getQueryData(['roles', 'me']);
-        expect(cachedRoles).toEqual(adminRoles);
-
-        // When: User logs out
-        testQueryClient.clear();
-
-        // Then: Cache should be completely cleared
-        const rolesAfterLogout = testQueryClient.getQueryData(['roles', 'me']);
-        expect(rolesAfterLogout).toBeUndefined();
+    expect(testQueryClient.getQueryData(['roles', 'me'])).toEqual(adminRoles);
+    expect(testQueryClient.getQueryData(['user-data'])).toEqual({
+      userId: 'admin-789',
     });
 
-    it('should NOT show Admin tab for Member user after Admin logout', async () => {
-        // This test verifies cache clearing at the QueryClient level
-        // Full integration with AuthProvider is tested in the last test
+    // Verify no member data leaked through
+    expect(testQueryClient.getQueryData(['user-data'])).not.toEqual({
+      userId: 'member-456',
+    });
+  });
 
-        // Step 1: Admin user - set admin roles in cache
-        const adminRoles = [
-            {
-                role_name: 'Admin',
-                role_id: 1
-            },
-            {
-                role_name: 'Member',
-                role_id: 2
-            },
-        ];
+  it('should prevent cross-user data leakage through cache', async () => {
+    // Given: User A's private data in cache
+    const userAData = {
+      roles: [
+        {
+          role_name: 'Admin',
+          role_id: 1,
+        },
+      ],
+      dinners: [
+        {
+          id: 1,
+          location: 'User A Private Location',
+        },
+      ],
+      participants: [
+        {
+          id: 1,
+          username: 'user_a_friend',
+        },
+      ],
+    };
 
-        testQueryClient.setQueryData(['roles', 'me'], adminRoles);
+    testQueryClient.setQueryData(['roles', 'me'], userAData.roles);
+    testQueryClient.setQueryData(
+      ['dinners', 'by-date', '2026-02-27'],
+      userAData.dinners,
+    );
+    testQueryClient.setQueryData(
+      ['participants', 'by-dinner', 1],
+      userAData.participants,
+    );
 
-        // Verify admin roles are in cache
-        expect(testQueryClient.getQueryData(['roles', 'me'])).toEqual(adminRoles);
+    // When: User A logs out
+    testQueryClient.clear();
 
-        // Step 2: Logout - clear cache
-        testQueryClient.clear();
+    // Then: User B should NOT see User A's data
+    expect(testQueryClient.getQueryData(['roles', 'me'])).toBeUndefined();
+    expect(
+      testQueryClient.getQueryData(['dinners', 'by-date', '2026-02-27']),
+    ).toBeUndefined();
+    expect(
+      testQueryClient.getQueryData(['participants', 'by-dinner', 1]),
+    ).toBeUndefined();
 
-        // Verify cache is cleared
-        expect(testQueryClient.getQueryData(['roles', 'me'])).toBeUndefined();
+    // Given: User B logs in with different data
+    const userBData = {
+      roles: [
+        {
+          role_name: 'Member',
+          role_id: 2,
+        },
+      ],
+      dinners: [
+        {
+          id: 2,
+          location: 'User B Location',
+        },
+      ],
+    };
 
-        // Step 3: Member user logs in - set member roles
-        const memberRoles = [
-            {
-                role_name: 'Member',
-                role_id: 2
-            }
-        ];
-        testQueryClient.setQueryData(['roles', 'me'], memberRoles);
+    testQueryClient.setQueryData(['roles', 'me'], userBData.roles);
+    testQueryClient.setQueryData(
+      ['dinners', 'by-date', '2026-02-27'],
+      userBData.dinners,
+    );
 
-        // Verify only member roles in cache (no admin roles leaked)
-        const currentRoles = testQueryClient.getQueryData(['roles', 'me']);
-        expect(currentRoles).toEqual(memberRoles);
-        expect(currentRoles).not.toEqual(adminRoles);
+    // Then: Only User B's data should be in cache
+    expect(testQueryClient.getQueryData(['roles', 'me'])).toEqual(
+      userBData.roles,
+    );
+    expect(
+      testQueryClient.getQueryData(['dinners', 'by-date', '2026-02-27']),
+    ).toEqual(userBData.dinners);
+
+    // User A's participant data should still be gone
+    expect(
+      testQueryClient.getQueryData(['participants', 'by-dinner', 1]),
+    ).toBeUndefined();
+  });
+
+  it('should integrate with AuthProvider signOut function', async () => {
+    // Given: Render AuthProvider with mocked dependencies
+    const { getValidAccessToken } = require('@/lib/tokenManager');
+
+    // Start with no token (logged out state)
+    getValidAccessToken.mockResolvedValue(null);
+
+    // Mock successful login
+    mockAuthApi.post.mockResolvedValue({
+      data: {
+        accessToken: 'test-access-token',
+        refreshToken: 'test-refresh-token',
+        user: {
+          id: '1',
+          email: 'admin@test.com',
+          name: 'Admin User',
+        },
+      },
     });
 
-    it('should clear all cached queries on logout', async () => {
-        // Given: Multiple cached queries
-        testQueryClient.setQueryData(['roles', 'me'], [
-            {
-                role_name: 'Admin',
-                role_id: 1
-            }
-        ]);
-        testQueryClient.setQueryData(['dinners', 'by-date', '2026-02-27'], [
-            {
-                id: 1,
-                dinnerDate: '2026-02-27'
-            },
-        ]);
-        testQueryClient.setQueryData(['participants', 'by-dinner', 10], [
-            {
-                id: 1,
-                username: 'john_doe'
-            },
-        ]);
-        testQueryClient.setQueryData(['user-profile', 'seeded'], true);
+    let signOutFn: (() => Promise<void>) | null = null;
 
-        // Verify all queries are cached
-        expect(testQueryClient.getQueryData(['roles', 'me'])).toBeDefined();
-        expect(testQueryClient.getQueryData(['dinners', 'by-date', '2026-02-27'])).toBeDefined();
-        expect(testQueryClient.getQueryData(['participants', 'by-dinner', 10])).toBeDefined();
-        expect(testQueryClient.getQueryData(['user-profile', 'seeded'])).toBeDefined();
+    // Create a component that captures the signOut function
+    function TestComponent() {
+      const { signOut, status } = require('@/providers/AuthProvider').useAuth();
+      signOutFn = signOut;
 
-        // When: User logs out (clear all cache)
-        testQueryClient.clear();
+      const { Text } = require('react-native');
+      return <Text>Status: {status}</Text>;
+    }
 
-        // Then: All queries should be cleared
-        expect(testQueryClient.getQueryData(['roles', 'me'])).toBeUndefined();
-        expect(testQueryClient.getQueryData(['dinners', 'by-date', '2026-02-27'])).toBeUndefined();
-        expect(testQueryClient.getQueryData(['participants', 'by-dinner', 10])).toBeUndefined();
-        expect(testQueryClient.getQueryData(['user-profile', 'seeded'])).toBeUndefined();
+    // Render with real AuthProvider
+    const {
+      queryClient: realQueryClient,
+    } = require('@/providers/QueryProvider');
+
+    // Set some cached data
+    realQueryClient.setQueryData(
+      ['roles', 'me'],
+      [
+        {
+          role_name: 'Admin',
+          role_id: 1,
+        },
+      ],
+    );
+    realQueryClient.setQueryData(['test-data'], { value: 'should be cleared' });
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    );
+
+    // Wait for initial load
+    await waitFor(() => expect(signOutFn).not.toBeNull());
+
+    // Verify cache has data
+    expect(realQueryClient.getQueryData(['roles', 'me'])).toBeDefined();
+    expect(realQueryClient.getQueryData(['test-data'])).toBeDefined();
+
+    // When: Call signOut
+    await signOutFn!();
+
+    // Then: Cache should be cleared
+    await waitFor(() => {
+      expect(realQueryClient.getQueryData(['roles', 'me'])).toBeUndefined();
+      expect(realQueryClient.getQueryData(['test-data'])).toBeUndefined();
     });
-
-    it('should handle logout → login → logout → login cycle correctly', async () => {
-        // Cycle 1: Admin login
-        const adminRoles = [
-            {
-                role_name: 'Admin',
-                role_id: 1
-            }
-        ];
-        testQueryClient.setQueryData(['roles', 'me'], adminRoles);
-        testQueryClient.setQueryData(['user-data'], {userId: 'admin-123'});
-
-        expect(testQueryClient.getQueryData(['roles', 'me'])).toEqual(adminRoles);
-
-        // Logout 1
-        testQueryClient.clear();
-        expect(testQueryClient.getQueryData(['roles', 'me'])).toBeUndefined();
-        expect(testQueryClient.getQueryData(['user-data'])).toBeUndefined();
-
-        // Cycle 2: Member login
-        const memberRoles = [
-            {
-                role_name: 'Member',
-                role_id: 2
-            }
-        ];
-        testQueryClient.setQueryData(['roles', 'me'], memberRoles);
-        testQueryClient.setQueryData(['user-data'], {userId: 'member-456'});
-
-        expect(testQueryClient.getQueryData(['roles', 'me'])).toEqual(memberRoles);
-        expect(testQueryClient.getQueryData(['user-data'])).toEqual({userId: 'member-456'});
-
-        // Logout 2
-        testQueryClient.clear();
-        expect(testQueryClient.getQueryData(['roles', 'me'])).toBeUndefined();
-        expect(testQueryClient.getQueryData(['user-data'])).toBeUndefined();
-
-        // Cycle 3: Admin login again
-        testQueryClient.setQueryData(['roles', 'me'], adminRoles);
-        testQueryClient.setQueryData(['user-data'], {userId: 'admin-789'});
-
-        expect(testQueryClient.getQueryData(['roles', 'me'])).toEqual(adminRoles);
-        expect(testQueryClient.getQueryData(['user-data'])).toEqual({userId: 'admin-789'});
-
-        // Verify no member data leaked through
-        expect(testQueryClient.getQueryData(['user-data'])).not.toEqual({userId: 'member-456'});
-    });
-
-    it('should prevent cross-user data leakage through cache', async () => {
-        // Given: User A's private data in cache
-        const userAData = {
-            roles: [
-                {
-                    role_name: 'Admin',
-                    role_id: 1
-                }
-            ],
-            dinners: [
-                {
-                    id: 1,
-                    location: 'User A Private Location'
-                }
-            ],
-            participants: [
-                {
-                    id: 1,
-                    username: 'user_a_friend'
-                }
-            ],
-        };
-
-        testQueryClient.setQueryData(['roles', 'me'], userAData.roles);
-        testQueryClient.setQueryData(['dinners', 'by-date', '2026-02-27'], userAData.dinners);
-        testQueryClient.setQueryData(['participants', 'by-dinner', 1], userAData.participants);
-
-        // When: User A logs out
-        testQueryClient.clear();
-
-        // Then: User B should NOT see User A's data
-        expect(testQueryClient.getQueryData(['roles', 'me'])).toBeUndefined();
-        expect(testQueryClient.getQueryData(['dinners', 'by-date', '2026-02-27'])).toBeUndefined();
-        expect(testQueryClient.getQueryData(['participants', 'by-dinner', 1])).toBeUndefined();
-
-        // Given: User B logs in with different data
-        const userBData = {
-            roles: [
-                {
-                    role_name: 'Member',
-                    role_id: 2
-                }
-            ],
-            dinners: [
-                {
-                    id: 2,
-                    location: 'User B Location'
-                }
-            ],
-        };
-
-        testQueryClient.setQueryData(['roles', 'me'], userBData.roles);
-        testQueryClient.setQueryData(['dinners', 'by-date', '2026-02-27'], userBData.dinners);
-
-        // Then: Only User B's data should be in cache
-        expect(testQueryClient.getQueryData(['roles', 'me'])).toEqual(userBData.roles);
-        expect(testQueryClient.getQueryData(['dinners', 'by-date', '2026-02-27'])).toEqual(userBData.dinners);
-
-        // User A's participant data should still be gone
-        expect(testQueryClient.getQueryData(['participants', 'by-dinner', 1])).toBeUndefined();
-    });
-
-    it('should integrate with AuthProvider signOut function', async () => {
-        // Given: Render AuthProvider with mocked dependencies
-        const {getValidAccessToken} = require('@/lib/tokenManager');
-
-        // Start with no token (logged out state)
-        getValidAccessToken.mockResolvedValue(null);
-
-        // Mock successful login
-        mockAuthApi.post.mockResolvedValue({
-            data: {
-                accessToken: 'test-access-token',
-                refreshToken: 'test-refresh-token',
-                user: {
-                    id: '1',
-                    email: 'admin@test.com',
-                    name: 'Admin User'
-                },
-            },
-        });
-
-        let signOutFn: (() => Promise<void>) | null = null;
-
-        // Create a component that captures the signOut function
-        function TestComponent() {
-
-            const {
-                signOut,
-                status
-            } = require('@/providers/AuthProvider').useAuth();
-            signOutFn = signOut;
-
-            const {Text} = require('react-native');
-            return <Text>Status: {status}</Text>;
-        }
-
-        // Render with real AuthProvider
-        const {queryClient: realQueryClient} = require('@/providers/QueryProvider');
-
-        // Set some cached data
-        realQueryClient.setQueryData(['roles', 'me'], [
-            {
-                role_name: 'Admin',
-                role_id: 1
-            }
-        ]);
-        realQueryClient.setQueryData(['test-data'], {value: 'should be cleared'});
-
-        render(
-            <AuthProvider>
-                <TestComponent/>
-            </AuthProvider>
-        );
-
-        // Wait for initial load
-        await waitFor(() => expect(signOutFn).not.toBeNull());
-
-        // Verify cache has data
-        expect(realQueryClient.getQueryData(['roles', 'me'])).toBeDefined();
-        expect(realQueryClient.getQueryData(['test-data'])).toBeDefined();
-
-        // When: Call signOut
-        await signOutFn!();
-
-        // Then: Cache should be cleared
-        await waitFor(() => {
-            expect(realQueryClient.getQueryData(['roles', 'me'])).toBeUndefined();
-            expect(realQueryClient.getQueryData(['test-data'])).toBeUndefined();
-        });
-    });
+  });
 });

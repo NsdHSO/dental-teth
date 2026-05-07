@@ -1,10 +1,10 @@
 import React from 'react';
-import {render} from '@testing-library/react-native';
-import {View} from 'react-native';
+import { render } from '@testing-library/react-native';
+import { View } from 'react-native';
 import LoginScreen from '../login';
 
 jest.mock('expo-router', () => ({
-  Stack: {Screen: () => null},
+  Stack: { Screen: () => null },
   useRouter: () => ({
     replace: jest.fn(),
   }),
@@ -18,7 +18,7 @@ jest.mock('@/providers/AuthProvider', () => ({
   }),
 }));
 
-jest.mock('@yuhuu/auth', () => ({
+jest.mock('@dental/auth', () => ({
   getBiometricPreference: jest.fn().mockResolvedValue(false),
   isBiometricAvailable: jest.fn().mockResolvedValue(false),
 }));
@@ -31,7 +31,7 @@ jest.mock('react-i18next', () => ({
 
 describe('LoginScreen', () => {
   it('should render with flex-1 style (not className) for iOS compatibility', () => {
-    const {UNSAFE_root} = render(<LoginScreen />);
+    const { UNSAFE_root } = render(<LoginScreen />);
 
     // ThemedView renders as a View component - find the root View
     const allViews = UNSAFE_root.findAllByType(View);
@@ -44,14 +44,14 @@ describe('LoginScreen', () => {
       : [rootView.props.style];
 
     expect(styleArray).toEqual(
-      expect.arrayContaining([expect.objectContaining({flex: 1})])
+      expect.arrayContaining([expect.objectContaining({ flex: 1 })]),
     );
 
     expect(rootView.props.className).toBeUndefined();
   });
 
   it('should render login form elements', () => {
-    const {getByPlaceholderText, getByText} = render(<LoginScreen />);
+    const { getByPlaceholderText, getByText } = render(<LoginScreen />);
 
     expect(getByPlaceholderText('auth.login.emailPlaceholder')).toBeTruthy();
     expect(getByPlaceholderText('auth.login.passwordPlaceholder')).toBeTruthy();
