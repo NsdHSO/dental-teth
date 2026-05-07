@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { GlowVariant } from '../constants/glowColors';
-import { getItem, setItem } from '@yuhuu/storage';
+import { getItem, setItem } from '@dental/storage';
 
 const STORAGE_KEY = 'glow-variant';
 
@@ -14,7 +14,8 @@ const defaultContext: GlowVariantContextType = {
   setGlowVariant: () => {},
 };
 
-const GlowVariantContext = createContext<GlowVariantContextType>(defaultContext);
+const GlowVariantContext =
+  createContext<GlowVariantContextType>(defaultContext);
 
 type GlowVariantProviderProps = {
   children: React.ReactNode;
@@ -25,7 +26,8 @@ export function GlowVariantProvider({
   children,
   initialVariant = 'cool',
 }: GlowVariantProviderProps) {
-  const [glowVariant, setGlowVariantState] = useState<GlowVariant>(initialVariant);
+  const [glowVariant, setGlowVariantState] =
+    useState<GlowVariant>(initialVariant);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load persisted variant on mount
