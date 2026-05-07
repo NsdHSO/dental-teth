@@ -1,5 +1,5 @@
 {
-  "extends": "@yuhuu/tsconfig/expo.json",
+  "extends": "@dental/tsconfig/expo.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
@@ -7,41 +7,31 @@
     "declaration": true,
     "declarationMap": true,
     "paths": {
-      "@/components/*": [
-        "./src/*"
-      ],
-      "@/hooks/*": [
-        "./src/hooks/*"
-      ],
-      "@/constants/*": [
-        "./src/constants/*"
-      ]
-    }
+      "@/components/*": ["./src/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/constants/*": ["./src/constants/*"],
+    },
   },
   "references": [
     {
-      "path": "../auth"
+      "path": "../auth",
     },
     {
-      "path": "../i18n"
+      "path": "../i18n",
     },
     {
-      "path": "../storage"
+      "path": "../storage",
     },
     {
-      "path": "../types"
-    }
+      "path": "../types",
+    },
   ],
-  "include": [
-    "src/**/*",
-    "nativewind-env.d.ts",
-    "svg.d.ts"
-  ],
+  "include": ["src/**/*", "nativewind-env.d.ts", "svg.d.ts"],
   "exclude": [
     "node_modules",
     "dist",
     "**/*.test.ts",
     "**/*.test.tsx",
-    "**/__tests__"
-  ]
+    "**/__tests__",
+  ],
 }
