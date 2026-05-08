@@ -37,7 +37,6 @@ export const AttachmentPickerSheet = forwardRef<BottomSheetModal, AttachmentPick
           if (file) {
             onSelect(file);
           }
-          (ref as React.MutableRefObject<BottomSheetModal | null>).current?.dismiss();
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
           Alert.alert(
@@ -46,7 +45,7 @@ export const AttachmentPickerSheet = forwardRef<BottomSheetModal, AttachmentPick
           );
         }
       },
-      [pick, onSelect, ref, t],
+      [pick, onSelect, t],
     );
 
     return (
@@ -65,6 +64,9 @@ export const AttachmentPickerSheet = forwardRef<BottomSheetModal, AttachmentPick
               key={option.id}
               onPress={() => handleSelect(option.id)}
               disabled={isLoading}
+              accessibilityRole="button"
+              accessibilityLabel={t(option.labelKey, option.id)}
+              accessibilityState={{ disabled: isLoading }}
               style={({ pressed }) => [
                 styles.option,
                 pressed && styles.optionPressed,
