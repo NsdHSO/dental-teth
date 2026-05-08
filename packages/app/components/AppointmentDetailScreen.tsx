@@ -1,12 +1,15 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  InteractionManager,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
@@ -19,7 +22,11 @@ import { useAppointmentQuery } from '@/features/appointments/hooks';
 import {
   useAppointmentAttachmentsQuery,
   useDeleteAppointmentAttachmentMutation,
+  useUploadAppointmentAttachmentMutation,
 } from '@/features/appointment-attachments/hooks';
+import { defaultExpoAttachmentPickerRepository } from '@/features/appointment-attachments/picker';
+import type { UploadFile } from '@/features/appointment-attachments/types';
+import { AttachmentPickerSheet } from './AttachmentPickerSheet';
 
 export function AppointmentDetailScreen() {
   const { t } = useTranslation();
@@ -35,6 +42,9 @@ export function AppointmentDetailScreen() {
   );
   const deleteMutation =
     useDeleteAppointmentAttachmentMutation(appointmentIdNum);
+  const uploadMutation =
+    useUploadAppointmentAttachmentMutation(appointmentIdNum);
+  const sheetRef = useRef<BottomSheetModal>(null);
 
   const handleDelete = useCallback(
     (attachmentId: number) => {
@@ -52,6 +62,26 @@ export function AppointmentDetailScreen() {
       );
     },
     [deleteMutation, t],
+  );
+
+  const handleAddAttachment = useCallback(() => {
+    if (Platform.OS === 'android') {
+      InteractionManager.runAfterInteractions(() => {
+        requestAnimationFrame(() => {
+          sheetRef.current?.present();
+        });
+      });
+    } else {
+      sheetRef.current?.present();
+    }
+  }, []);
+
+  const handleFileSelected = useCallback(
+    (file: UploadFile) => {
+      sheetRef.current?.dismiss();
+      uploadMutation.mutate(file);
+    },
+    [uploadMutation],
   );
 
   if (isLoading) {
@@ -155,19 +185,7 @@ export function AppointmentDetailScreen() {
           </GlassCard>
         ))}
 
-        <Pressable
-          onPress={() => {
-            // TODO: integrate document/image picker
-            Alert.alert(
-              t('attachments.addTitle', 'Add attachment'),
-              t(
-                'attachments.pickerPlaceholder',
-                'Image picker integration pending',
-              ),
-            );
-          }}
-          style={styles.addButton}
-        >
+        <Pressable onPress={handleAddAttachment} style={styles.addButton}>
           <IconSymbol name='plus' size={18} color='#1E40AF' />
           <ThemedText
             type='default'
@@ -177,6 +195,11 @@ export function AppointmentDetailScreen() {
             {t('attachments.add', 'Add attachment')}
           </ThemedText>
         </Pressable>
+        <AttachmentPickerSheet
+          ref={sheetRef}
+          onSelect={handleFileSelected}
+          repository={defaultExpoAttachmentPickerRepository}
+        />
       </ScrollView>
     </GlassBackground>
   );
