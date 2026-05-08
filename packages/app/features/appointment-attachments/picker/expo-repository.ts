@@ -4,12 +4,12 @@ import type { AttachmentPickerRepository } from './types';
 import type { UploadFile } from '../types';
 
 function mapImageResult(result: ImagePicker.ImagePickerResult): UploadFile | null {
-  if (result.canceled || result.assets.length === 0) return null;
+  if (result.canceled || !result.assets?.length) return null;
   const asset = result.assets[0];
   return {
     uri: asset.uri,
     name: asset.fileName ?? 'image.jpg',
-    type: asset.type === 'video' ? 'video/mp4' : (asset.mimeType ?? 'image/jpeg'),
+    type: asset.mimeType ?? 'image/jpeg',
   };
 }
 
