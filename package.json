@@ -9,6 +9,7 @@
     "ios": "pnpm --filter @dental/app ios",
     "android:dev": "pnpm --filter @dental/app android:dev",
     "ios:dev": "pnpm --filter @dental/app ios:dev",
+    "start:go": "pnpm --filter @dental/app start --go",
     "web": "pnpm --filter @dental/app web",
     "lint": "pnpm --filter @dental/app lint",
     "lint:fix": "pnpm lint --fix",
