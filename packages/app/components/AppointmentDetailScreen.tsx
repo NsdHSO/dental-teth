@@ -1,7 +1,8 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   InteractionManager,
   Platform,
   Pressable,
@@ -9,6 +10,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { getValidAccessToken, APP_BASE } from '@dental/auth';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -27,6 +29,7 @@ import {
 import { defaultExpoAttachmentPickerRepository } from '@/features/appointment-attachments/picker';
 import type { UploadFile } from '@/features/appointment-attachments/types';
 import { AttachmentPickerSheet } from './AttachmentPickerSheet';
+import { AttachmentImageViewer } from './AttachmentImageViewer';
 
 export function AppointmentDetailScreen() {
   const { t } = useTranslation();
@@ -45,6 +48,12 @@ export function AppointmentDetailScreen() {
   const uploadMutation =
     useUploadAppointmentAttachmentMutation(appointmentIdNum);
   const sheetRef = useRef<BottomSheetModal>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [viewedAttachment, setViewedAttachment] = useState<typeof attachments[number] | null>(null);
+
+  useEffect(() => {
+    getValidAccessToken().then(setToken);
+  }, []);
 
   const handleDelete = useCallback(
     (attachmentId: number) => {
@@ -164,26 +173,59 @@ export function AppointmentDetailScreen() {
           </ThemedText>
         )}
 
-        {attachments.map((att) => (
-          <GlassCard
-            key={att.id}
-            variant='tinted'
-            borderRadius={12}
-            style={styles.attachmentCard}
-          >
-            <View style={styles.attachmentRow}>
-              <ThemedText type='default' weight='semibold'>
-                {att.filename ?? `Attachment #${att.id}`}
-              </ThemedText>
-              <Pressable onPress={() => handleDelete(att.id)} hitSlop={8}>
-                <IconSymbol name='trash' size={18} color='#EF4444' />
-              </Pressable>
-            </View>
-            <ThemedText type='default' style={styles.meta}>
-              {att.mimeType} · {formatBytes(att.sizeBytes)}
-            </ThemedText>
-          </GlassCard>
-        ))}
+        {attachments.map((att) => {
+          const isImage = att.mimeType?.startsWith('image/');
+          const thumbUri = isImage
+            ? `${APP_BASE}/appointments/${appointmentIdNum}/attachments/${att.id}/download`
+            : null;
+
+          return (
+            <Pressable
+              key={att.id}
+              onPress={() => isImage && setViewedAttachment(att)}
+              disabled={!isImage}
+            >
+              <GlassCard
+                variant='tinted'
+                borderRadius={12}
+                style={styles.attachmentCard}
+              >
+                <View style={styles.attachmentRow}>
+                  <View style={styles.attachmentLeft}>
+                    {isImage && token && thumbUri ? (
+                      <Image
+                        source={{
+                          uri: thumbUri,
+                          headers: { Authorization: `Bearer ${token}` },
+                        }}
+                        style={styles.thumbnail}
+                        resizeMode='cover'
+                      />
+                    ) : (
+                      <IconSymbol
+                        name='doc.text'
+                        size={24}
+                        color='#6B7280'
+                        style={{ marginRight: 12 }}
+                      />
+                    )}
+                    <View>
+                      <ThemedText type='default' weight='semibold'>
+                        {att.filename ?? `Attachment #${att.id}`}
+                      </ThemedText>
+                      <ThemedText type='default' style={styles.meta}>
+                        {att.mimeType} · {formatBytes(att.sizeBytes)}
+                      </ThemedText>
+                    </View>
+                  </View>
+                  <Pressable onPress={() => handleDelete(att.id)} hitSlop={8}>
+                    <IconSymbol name='trash' size={18} color='#EF4444' />
+                  </Pressable>
+                </View>
+              </GlassCard>
+            </Pressable>
+          );
+        })}
 
         <Pressable onPress={handleAddAttachment} style={styles.addButton}>
           <IconSymbol name='plus' size={18} color='#1E40AF' />
@@ -199,6 +241,13 @@ export function AppointmentDetailScreen() {
           ref={sheetRef}
           onSelect={handleFileSelected}
           repository={defaultExpoAttachmentPickerRepository}
+        />
+        <AttachmentImageViewer
+          visible={viewedAttachment !== null}
+          onClose={() => setViewedAttachment(null)}
+          appointmentId={appointmentIdNum}
+          attachmentId={viewedAttachment?.id ?? 0}
+          filename={viewedAttachment?.filename ?? null}
         />
       </ScrollView>
     </GlassBackground>
@@ -271,6 +320,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  attachmentLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  thumbnail: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    marginRight: 12,
   },
   meta: {
     opacity: 0.7,
