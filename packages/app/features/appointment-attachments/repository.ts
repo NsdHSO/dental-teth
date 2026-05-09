@@ -1,4 +1,4 @@
-import { appApi, unwrap, getValidAccessToken } from '@dental/auth';
+import { appApi, unwrap, getValidAccessToken, APP_BASE } from '@dental/auth';
 import type {
   AppointmentAttachment,
   AppointmentAttachmentDto,
@@ -11,8 +11,6 @@ import {
   toAppointmentAttachment,
   toAppointmentAttachmentsList,
 } from './mapper';
-
-const APP_BASE = 'http://localhost:8080/v1'; // TODO: read from env
 
 export interface AppointmentAttachmentsRepository {
   list(
