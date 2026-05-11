@@ -1,5 +1,5 @@
 {
-  "name": "@yuhuu/storage",
+  "name": "@dental/storage",
   "version": "0.0.0",
   "private": true,
   "main": "./dist/index.js",
@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@yuhuu/tsconfig": "workspace:*",
+    "@dental/tsconfig": "workspace:*",
     "babel-jest": "^29.7.0",
     "babel-preset-expo": "~13.0.0",
     "expo-secure-store": "~15.0.8",

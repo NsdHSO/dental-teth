@@ -1,13 +1,13 @@
-# Yuhuu - React Native Boilerplate 👋
+# Dental - React Native Boilerplate 👋
 
 A production-ready, fully-tested boilerplate for building cross-platform mobile and web applications with React Native
 and Expo. Features complete authentication flow, comprehensive test coverage, and modern development practices.
 
 ## 📥 Download Latest Build
 
-[![Latest FAT Build](https://img.shields.io/github/v/release/NsdHSO/yuhuu?include_prereleases&label=Latest%20FAT%20Build&color=blue&filter=latest-fat-v*)](https://github.com/NsdHSO/yuhuu/releases)
+[![Latest FAT Build](https://img.shields.io/github/v/release/NsdHSO/dental?include_prereleases&label=Latest%20FAT%20Build&color=blue&filter=latest-fat-v*)](https://github.com/NsdHSO/dental/releases)
 
-**[📱 Download Latest Android APK](https://github.com/NsdHSO/yuhuu/releases)** • **[🍎 Download Latest iOS IPA](https://github.com/NsdHSO/yuhuu/releases/tag/latest-fat-ios)**
+**[📱 Download Latest Android APK](https://github.com/NsdHSO/dental/releases)** • **[🍎 Download Latest iOS IPA](https://github.com/NsdHSO/dental/releases/tag/latest-fat-ios)**
 
 > 💡 **Tip:** Look for releases titled "FAT Build v##" (e.g., v85, v86, v87). Download the **highest version number** for the latest build.
 
@@ -110,8 +110,8 @@ Time:        ~4s
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/NsdHSO/yuhuu.git
-   cd yuhuu
+   git clone https://github.com/NsdHSO/dental.git
+   cd dental
    ```
 
 2. **Install dependencies**
@@ -171,7 +171,7 @@ pnpm web
 ## 🧩 Project Structure
 
 ```
-yuhuu/
+dental/
 ├── app/                          # Application screens (Expo Router)
 │   ├── (auth)/                  # Authentication screens
 │   │   ├── __tests__/          # Auth screen tests

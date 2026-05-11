@@ -3,7 +3,6 @@ import {View, StyleSheet, Platform} from 'react-native';
 import {
   BottomSheetModal,
   BottomSheetBackdropProps,
-  BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import Animated, {
   useAnimatedStyle,
@@ -57,6 +56,10 @@ export const GlassBottomSheet = forwardRef<BottomSheetModal, GlassBottomSheetPro
       <BottomSheetModal
         ref={ref}
         snapPoints={snapPoints}
+        // v5 defaults this to true, which forces the sheet to shrink to its
+        // content height and ignore snapPoints. Disable so callers can
+        // explicitly request '60%', '90%', etc. via snapPoints.
+        enableDynamicSizing={false}
         enableDismissOnClose={true}
         onChange={handleSheetChange}
         backdropComponent={(props) => (
@@ -83,12 +86,9 @@ export const GlassBottomSheet = forwardRef<BottomSheetModal, GlassBottomSheetPro
         android_keyboardInputMode="adjustResize"
         waitFor={Platform.OS === 'android' ? undefined : undefined}
       >
-        <BottomSheetView
-          key={`content-${glowVariant}-${scheme}`}
-          style={styles.contentContainer}
-        >
+        <View style={styles.contentContainer}>
           {children}
-        </BottomSheetView>
+        </View>
       </BottomSheetModal>
     );
   }

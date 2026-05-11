@@ -4,14 +4,22 @@ import { GlowVariantProvider, useGlowVariant } from '../useGlowVariant';
 import type { GlowVariant } from '../../constants/glowColors';
 
 // Mock the storage module
-jest.mock('@yuhuu/storage', () => ({
+jest.mock('@dental/storage', () => ({
   getItem: jest.fn(() => Promise.resolve(null)),
   setItem: jest.fn(() => Promise.resolve()),
 }));
 
 describe('useGlowVariant', () => {
-  const wrapper = ({ children, initialVariant }: { children: React.ReactNode; initialVariant?: GlowVariant }) => (
-    <GlowVariantProvider initialVariant={initialVariant}>{children}</GlowVariantProvider>
+  const wrapper = ({
+    children,
+    initialVariant,
+  }: {
+    children: React.ReactNode;
+    initialVariant?: GlowVariant;
+  }) => (
+    <GlowVariantProvider initialVariant={initialVariant}>
+      {children}
+    </GlowVariantProvider>
   );
 
   describe('default behavior', () => {
@@ -39,7 +47,8 @@ describe('useGlowVariant', () => {
   describe('initial variant', () => {
     it('should use the provided initial variant', async () => {
       const { result } = renderHook(() => useGlowVariant(), {
-        wrapper: ({ children }) => wrapper({ children, initialVariant: 'warm' }),
+        wrapper: ({ children }) =>
+          wrapper({ children, initialVariant: 'warm' }),
       });
 
       await waitFor(() => {
@@ -52,7 +61,8 @@ describe('useGlowVariant', () => {
 
       for (const variant of variants) {
         const { result } = renderHook(() => useGlowVariant(), {
-          wrapper: ({ children }) => wrapper({ children, initialVariant: variant }),
+          wrapper: ({ children }) =>
+            wrapper({ children, initialVariant: variant }),
         });
 
         await waitFor(() => {

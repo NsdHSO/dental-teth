@@ -1,0 +1,1 @@
+export {AppointmentsCalendarOrganism, type AppointmentsCalendarOrganismProps, type AppointmentAgendaItemExtended} from './AppointmentsCalendar';

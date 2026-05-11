@@ -1,2 +1,2 @@
-// Re-export from @yuhuu/components to avoid duplication
-export {useLanguage} from '@yuhuu/components';
+// Re-export from @dental/components to avoid duplication
+export { useLanguage } from '@dental/components';

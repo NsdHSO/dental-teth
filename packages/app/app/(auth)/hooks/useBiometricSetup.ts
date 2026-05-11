@@ -1,5 +1,5 @@
-import {useEffect, useState} from 'react';
-import {getBiometricPreference, isBiometricAvailable} from '@yuhuu/auth';
+import { useEffect, useState } from 'react';
+import { getBiometricPreference, isBiometricAvailable } from '@dental/auth';
 
 export function useBiometricSetup() {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
@@ -18,5 +18,5 @@ export function useBiometricSetup() {
     })();
   }, []);
 
-  return {biometricAvailable};
+  return { biometricAvailable };
 }

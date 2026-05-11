@@ -23,6 +23,7 @@ export * from './hooks/useGlassColors';
 // Atoms
 export * from './atoms/accordion';
 export * from './atoms/badge';
+export * from './atoms/calendar-expandable';
 export * from './atoms/date-picker';
 export * from './atoms/dinner-selector';
 export * from './atoms/empty-state';
@@ -35,14 +36,22 @@ export * from './atoms/tab-liquid-blob';
 export * from './atoms/custom-tab-bar';
 export * from './atoms/tab-screen-wrapper';
 export * from './atoms/gender-avatar';
+export * from './atoms/user-avatar';
 export * from './atoms/SubmitButton';
+export * from './atoms/status-badge';
+export * from './atoms/patient-inputs';
+export * from './atoms/time-field';
 
 // Molecules
+export * from './molecules/appointment-card';
+export * from './molecules/appointment-form';
 export * from './molecules/category-badge';
 export * from './molecules/participant-form';
 export * from './molecules/dinner-form';
 export * from './molecules/dinner-details-card';
 export * from './molecules/language-picker';
+export * from './molecules/glow-variant-picker';
+export * from './molecules/settings-panel';
 export * from './molecules/dinner-graph';
 export * from './molecules/user-search';
 export * from './molecules/gender-picker';
@@ -51,6 +60,7 @@ export * from './molecules/glass-interactive';
 export * from './molecules/glass-content';
 
 // Organisms
+export * from './organisms/appointments-calendar';
 export * from './organisms/dinner-attendance';
 export * from './organisms/participants-list';
 

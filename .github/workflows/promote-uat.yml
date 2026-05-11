@@ -2,7 +2,7 @@ name: Promote to UAT
 
 on:
   pull_request:
-    types: [ labeled ]
+    types: [labeled]
 
 jobs:
   deploy-uat:
@@ -43,11 +43,11 @@ jobs:
           mkdir -p packages/app/android/app
           keytool -genkeypair -v -storetype PKCS12 \
             -keystore packages/app/android/app/release.keystore \
-            -alias yuhuu-key \
+            -alias dental-key \
             -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass ${{ secrets.KEYSTORE_PASSWORD || 'yuhuu123' }} \
-            -keypass ${{ secrets.KEY_PASSWORD || 'yuhuu123' }} \
-            -dname "CN=Church, OU=Mobile, O=Church, L=Bucharest, ST=Romania, C=RO"
+            -storepass ${{ secrets.KEYSTORE_PASSWORD || 'dental123' }} \
+            -keypass ${{ secrets.KEY_PASSWORD || 'dental123' }} \
+            -dname "CN=Dental, OU=Mobile, O=Dental, L=Bucharest, ST=Romania, C=RO"
 
       - name: Prebuild Android
         working-directory: packages/app
@@ -68,14 +68,14 @@ jobs:
           EXPO_PUBLIC_GRAPHQL_URL: ${{ secrets.UAT_GRAPHQL_URL }}
           EXPO_PUBLIC_ENV: uat
           MYAPP_RELEASE_STORE_FILE: app/release.keystore
-          MYAPP_RELEASE_KEY_ALIAS: yuhuu-key
-          MYAPP_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'yuhuu123' }}
-          MYAPP_RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'yuhuu123' }}
+          MYAPP_RELEASE_KEY_ALIAS: dental-key
+          MYAPP_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'dental123' }}
+          MYAPP_RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'dental123' }}
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: yuhuu-uat-release.apk
+          name: dental-uat-release.apk
           path: packages/app/android/app/build/outputs/apk/release/app-release.apk
 
       - name: Comment on PR
@@ -92,7 +92,7 @@ jobs:
             🔗 GraphQL URL: \`${{ secrets.UAT_GRAPHQL_URL }}\`
 
             📦 **Download APK:**
-            Go to [Actions > Artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) and download \`yuhuu-uat-release.apk\`
+            Go to [Actions > Artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) and download \`dental-uat-release.apk\`
 
             📋 **Next steps:**
             1. Download and test UAT build

@@ -1,24 +1,21 @@
 {
-  "extends": "@yuhuu/tsconfig/base.json",
+  "extends": "@dental/tsconfig/base.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "composite": true
+    "composite": true,
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "references": [
     {
-      "path": "../storage"
-    }
+      "path": "../storage",
+    },
   ],
   "exclude": [
     "node_modules",
     "dist",
     "**/__tests__/**",
     "**/*.test.ts",
-    "**/*.test.tsx"
-  ]
+    "**/*.test.tsx",
+  ],
 }

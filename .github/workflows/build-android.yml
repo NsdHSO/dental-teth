@@ -28,11 +28,11 @@ jobs:
       - name: Verify workspace packages
         run: |
           echo "=== Workspace symlinks ==="
-          ls -la packages/app/node_modules/@yuhuu/ || echo "No @yuhuu symlinks found"
-          echo "=== @yuhuu/types resolution ==="
-          ls -la packages/app/node_modules/@yuhuu/types/src/ || echo "@yuhuu/types/src not found"
+          ls -la packages/app/node_modules/@dental/ || echo "No @dental symlinks found"
+          echo "=== @dental/types resolution ==="
+          ls -la packages/app/node_modules/@dental/types/src/ || echo "@dental/types/src not found"
           echo "=== pnpm workspace packages ==="
-          pnpm list --depth 0 2>/dev/null | grep @yuhuu || echo "No @yuhuu packages in pnpm list"
+          pnpm list --depth 0 2>/dev/null | grep @dental || echo "No @dental packages in pnpm list"
 
       - name: Setup Expo
         uses: expo/expo-github-action@v8
@@ -45,11 +45,11 @@ jobs:
           mkdir -p packages/app/android/app
           keytool -genkeypair -v -storetype PKCS12 \
             -keystore packages/app/android/app/release.keystore \
-            -alias yuhuu-key \
+            -alias dental-key \
             -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass ${{ secrets.KEYSTORE_PASSWORD || 'yuhuu123' }} \
-            -keypass ${{ secrets.KEY_PASSWORD || 'yuhuu123' }} \
-            -dname "CN=Church, OU=Mobile, O=Church, L=Bucharest, ST=Romania, C=RO"
+            -storepass ${{ secrets.KEYSTORE_PASSWORD || 'dental123' }} \
+            -keypass ${{ secrets.KEY_PASSWORD || 'dental123' }} \
+            -dname "CN=Dental, OU=Mobile, O=Dental, L=Bucharest, ST=Romania, C=RO"
 
       - name: Validate environment variables
         run: |
@@ -132,14 +132,14 @@ jobs:
           EXPO_PUBLIC_ENV: fat
           REACT_NATIVE_ABIS: arm64-v8a
           MYAPP_RELEASE_STORE_FILE: app/release.keystore
-          MYAPP_RELEASE_KEY_ALIAS: yuhuu-key
-          MYAPP_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'yuhuu123' }}
-          MYAPP_RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'yuhuu123' }}
+          MYAPP_RELEASE_KEY_ALIAS: dental-key
+          MYAPP_RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'dental123' }}
+          MYAPP_RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'dental123' }}
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: yuhuu-fat-release-${{ github.sha }}
+          name: dental-fat-release-${{ github.sha }}
           path: packages/app/android/app/build/outputs/apk/release/app-release.apk
           retention-days: 30
 
@@ -154,10 +154,10 @@ jobs:
       - name: Download APK
         uses: actions/download-artifact@v4
         with:
-          name: yuhuu-fat-release-${{ github.sha }}
+          name: dental-fat-release-${{ github.sha }}
 
       - name: Rename APK
-        run: mv app-release.apk yuhuu-fat-${{ github.sha }}.apk
+        run: mv app-release.apk dental-fat-${{ github.sha }}.apk
 
       - name: Create Release Body
         id: release-body
@@ -183,7 +183,7 @@ jobs:
           tag_name: latest-fat-v${{ github.run_number }}
           name: FAT Build v${{ github.run_number }}
           body_path: release-body.md
-          files: yuhuu-fat-${{ github.sha }}.apk
+          files: dental-fat-${{ github.sha }}.apk
           prerelease: true
           draft: false
         env:

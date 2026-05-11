@@ -1,32 +1,30 @@
 {
-  "extends": "@yuhuu/tsconfig/expo.json",
+  "extends": "@dental/tsconfig/expo.json",
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
-    }
+      "@/*": ["./*"],
+    },
   },
   "references": [
     {
-      "path": "../storage"
+      "path": "../storage",
     },
     {
-      "path": "../http"
+      "path": "../http",
     },
     {
-      "path": "../i18n"
+      "path": "../i18n",
     },
     {
-      "path": "../auth"
-    }
+      "path": "../auth",
+    },
   ],
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "nativewind-env.d.ts"
-  ]
+    "nativewind-env.d.ts",
+  ],
 }

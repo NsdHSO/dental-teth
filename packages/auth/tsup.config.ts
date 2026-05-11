@@ -1,19 +1,19 @@
-import {defineConfig} from 'tsup';
+import { defineConfig } from 'tsup';
 
 export default defineConfig({
-    entry: ['src/index.ts'],
-    tsconfig: 'tsconfig.build.json',
-    format: ['cjs', 'esm'],
-    dts: true,
-    clean: true,
-    external: [
-        'react-native',
-        'expo-secure-store',
-        'expo-local-authentication',
-        'expo-router',
-        'axios',
-        'jwt-decode',
-        '@yuhuu/storage',
-        '@yuhuu/http',
-    ],
+  entry: ['src/index.ts'],
+  tsconfig: 'tsconfig.build.json',
+  format: ['cjs', 'esm'],
+  dts: true,
+  clean: true,
+  external: [
+    'react-native',
+    'expo-secure-store',
+    'expo-local-authentication',
+    'expo-router',
+    'axios',
+    'jwt-decode',
+    '@dental/storage',
+    '@dental/http',
+  ],
 });

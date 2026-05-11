@@ -1,59 +1,68 @@
 import React from 'react';
-import {fireEvent, render, screen, waitFor} from '@testing-library/react-native';
-import {Alert} from 'react-native';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
+import { Alert } from 'react-native';
 import LoginScreen from '../login';
-import {useAuth} from '@/providers/AuthProvider';
-import {useRouter} from 'expo-router';
+import { useAuth } from '@/providers/AuthProvider';
+import { useRouter } from 'expo-router';
 
 // Mock dependencies
 jest.mock('expo-router', () => ({
-    Stack: {
-        Screen: () => null
-    },
-    useRouter: jest.fn()
+  Stack: {
+    Screen: () => null,
+  },
+  useRouter: jest.fn(),
 }));
 
 jest.mock('@/providers/AuthProvider', () => ({
-    useAuth: jest.fn()
+  useAuth: jest.fn(),
 }));
 
 jest.mock('@/hooks/use-color-scheme', () => ({
-    useColorScheme: () => 'light'
+  useColorScheme: () => 'light',
 }));
 
-jest.mock('@yuhuu/auth', () => ({
-    isBiometricAvailable: jest.fn().mockResolvedValue(false),
-    getBiometricPreference: jest.fn().mockResolvedValue(false),
+jest.mock('@dental/auth', () => ({
+  isBiometricAvailable: jest.fn().mockResolvedValue(false),
+  getBiometricPreference: jest.fn().mockResolvedValue(false),
 }));
 
 // Mock react-i18next to return the translation key as-is
 jest.mock('react-i18next', () => ({
-    useTranslation: () => ({
-        t: (key: string) => {
-            const translations: Record<string, string> = {
-                'auth.login.title': 'Sign in',
-                'auth.login.welcome': 'Welcome back',
-                'auth.login.emailPlaceholder': 'Email',
-                'auth.login.passwordPlaceholder': 'Password',
-                'auth.login.submit': 'Sign in',
-                'auth.login.submitting': 'Signing in\u2026',
-                'auth.login.noAccount': "Don't have an account? Create one",
-                'auth.login.biometricButton': 'Sign in with Face ID',
-                'auth.login.biometricButtonAndroid': 'Sign in with biometrics',
-                'auth.login.biometricDivider': 'or',
-                'auth.login.biometricAccessibilityLabel': 'Sign in with Face ID or Touch ID',
-                'auth.login.biometricAccessibilityLabelAndroid': 'Sign in with biometrics',
-                'auth.login.biometricAccessibilityHint': 'Authenticate using your device biometrics to sign in',
-                'auth.login.missingFields': 'Please enter email and password.',
-                'auth.login.error': 'Login failed. Please try again.',
-                'auth.login.biometricError': 'Biometric login failed. Please try again.',
-                'common.missingFields': 'Missing fields',
-                'common.error': 'Error',
-            };
-            return translations[key] ?? key;
-        },
-        i18n: {language: 'en', changeLanguage: jest.fn()},
-    }),
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'auth.login.title': 'Sign in',
+        'auth.login.welcome': 'Welcome back',
+        'auth.login.emailPlaceholder': 'Email',
+        'auth.login.passwordPlaceholder': 'Password',
+        'auth.login.submit': 'Sign in',
+        'auth.login.submitting': 'Signing in\u2026',
+        'auth.login.noAccount': "Don't have an account? Create one",
+        'auth.login.biometricButton': 'Sign in with Face ID',
+        'auth.login.biometricButtonAndroid': 'Sign in with biometrics',
+        'auth.login.biometricDivider': 'or',
+        'auth.login.biometricAccessibilityLabel':
+          'Sign in with Face ID or Touch ID',
+        'auth.login.biometricAccessibilityLabelAndroid':
+          'Sign in with biometrics',
+        'auth.login.biometricAccessibilityHint':
+          'Authenticate using your device biometrics to sign in',
+        'auth.login.missingFields': 'Please enter email and password.',
+        'auth.login.error': 'Login failed. Please try again.',
+        'auth.login.biometricError':
+          'Biometric login failed. Please try again.',
+        'common.missingFields': 'Missing fields',
+        'common.error': 'Error',
+      };
+      return translations[key] ?? key;
+    },
+    i18n: { language: 'en', changeLanguage: jest.fn() },
+  }),
 }));
 
 // Mock Alert
@@ -63,277 +72,289 @@ jest.spyOn(Alert, 'alert');
 jest.setTimeout(30000);
 
 describe('LoginScreen', () => {
-    const mockPush = jest.fn();
-    const mockReplace = jest.fn();
-    const mockSignIn = jest.fn();
+  const mockPush = jest.fn();
+  const mockReplace = jest.fn();
+  const mockSignIn = jest.fn();
 
-    beforeEach(() => {
-        jest.clearAllMocks();
-        (useRouter as jest.Mock).mockReturnValue({
-            push: mockPush,
-            replace: mockReplace
-        });
-        (useAuth as jest.Mock).mockReturnValue({
-            signIn: mockSignIn,
-            status: 'signed-out'
-        });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useRouter as jest.Mock).mockReturnValue({
+      push: mockPush,
+      replace: mockReplace,
+    });
+    (useAuth as jest.Mock).mockReturnValue({
+      signIn: mockSignIn,
+      status: 'signed-out',
+    });
+  });
+
+  describe('Rendering', () => {
+    it('should render login form with all elements', () => {
+      render(<LoginScreen />);
+
+      expect(screen.getByText('Welcome back')).toBeTruthy();
+      expect(screen.getByPlaceholderText('Email')).toBeTruthy();
+      expect(screen.getByPlaceholderText('Password')).toBeTruthy();
+      expect(screen.getByText('Sign in')).toBeTruthy();
+      expect(screen.getByText(/Don't have an account/)).toBeTruthy();
     });
 
-    describe('Rendering', () => {
-        it('should render login form with all elements', () => {
-            render(<LoginScreen/>);
-
-            expect(screen.getByText('Welcome back')).toBeTruthy();
-            expect(screen.getByPlaceholderText('Email')).toBeTruthy();
-            expect(screen.getByPlaceholderText('Password')).toBeTruthy();
-            expect(screen.getByText('Sign in')).toBeTruthy();
-            expect(screen.getByText(/Don't have an account/)).toBeTruthy();
-        });
-
-        it.skip('should render environment variables debug section', async () => {
-            // Skipped: ScrollView doesn't render off-screen content in test environment
-        });
-
-        it.skip('should show loading state during sign in', () => {
-            // Skipped: TouchableOpacity text rendering issue in tests
-        });
+    it.skip('should render environment variables debug section', async () => {
+      // Skipped: ScrollView doesn't render off-screen content in test environment
     });
 
-    describe('User Interactions', () => {
-        it('should update email input when user types', () => {
-            render(<LoginScreen/>);
+    it.skip('should show loading state during sign in', () => {
+      // Skipped: TouchableOpacity text rendering issue in tests
+    });
+  });
 
-            const emailInput = screen.getByPlaceholderText('Email');
-            fireEvent.changeText(emailInput, 'test@example.com');
+  describe('User Interactions', () => {
+    it('should update email input when user types', () => {
+      render(<LoginScreen />);
 
-            expect(emailInput.props.value).toBe('test@example.com');
-        });
+      const emailInput = screen.getByPlaceholderText('Email');
+      fireEvent.changeText(emailInput, 'test@example.com');
 
-        it('should update password input when user types', () => {
-            render(<LoginScreen/>);
-
-            const passwordInput = screen.getByPlaceholderText('Password');
-            fireEvent.changeText(passwordInput, 'password123');
-
-            expect(passwordInput.props.value).toBe('password123');
-        });
-
-        it('should navigate to register screen when clicking create account link', () => {
-            render(<LoginScreen/>);
-
-            const createAccountLink = screen.getByText(/Don't have an account/);
-            fireEvent.press(createAccountLink);
-
-            expect(mockPush).toHaveBeenCalledWith('/(auth)/register');
-        });
+      expect(emailInput.props.value).toBe('test@example.com');
     });
 
-    describe('Form Validation', () => {
-        it('should show alert when email is empty', async () => {
-            render(<LoginScreen/>);
+    it('should update password input when user types', () => {
+      render(<LoginScreen />);
 
-            const passwordInput = screen.getByPlaceholderText('Password');
-            fireEvent.changeText(passwordInput, 'password123');
+      const passwordInput = screen.getByPlaceholderText('Password');
+      fireEvent.changeText(passwordInput, 'password123');
 
-            const signInButton = screen.getByText('Sign in');
-            fireEvent.press(signInButton);
-
-            await waitFor(() => {
-                expect(Alert.alert).toHaveBeenCalledWith(
-                    'Missing fields',
-                    'Please enter email and password.'
-                );
-            });
-
-            expect(mockSignIn).not.toHaveBeenCalled();
-        });
-
-        it('should show alert when password is empty', async () => {
-            render(<LoginScreen/>);
-
-            const emailInput = screen.getByPlaceholderText('Email');
-            fireEvent.changeText(emailInput, 'test@example.com');
-
-            const signInButton = screen.getByText('Sign in');
-            fireEvent.press(signInButton);
-
-            await waitFor(() => {
-                expect(Alert.alert).toHaveBeenCalledWith(
-                    'Missing fields',
-                    'Please enter email and password.'
-                );
-            });
-
-            expect(mockSignIn).not.toHaveBeenCalled();
-        });
-
-        it('should show alert when both fields are empty', async () => {
-            render(<LoginScreen/>);
-
-            const signInButton = screen.getByText('Sign in');
-            fireEvent.press(signInButton);
-
-            await waitFor(() => {
-                expect(Alert.alert).toHaveBeenCalledWith(
-                    'Missing fields',
-                    'Please enter email and password.'
-                );
-            });
-
-            expect(mockSignIn).not.toHaveBeenCalled();
-        });
+      expect(passwordInput.props.value).toBe('password123');
     });
 
-    describe('Sign In Flow', () => {
-        it('should call signIn with trimmed email and password', async () => {
-            mockSignIn.mockResolvedValue(undefined);
+    it('should navigate to register screen when clicking create account link', () => {
+      render(<LoginScreen />);
 
-            render(<LoginScreen/>);
+      const createAccountLink = screen.getByText(/Don't have an account/);
+      fireEvent.press(createAccountLink);
 
-            const emailInput = screen.getByPlaceholderText('Email');
-            const passwordInput = screen.getByPlaceholderText('Password');
+      expect(mockPush).toHaveBeenCalledWith('/(auth)/register');
+    });
+  });
 
-            fireEvent.changeText(emailInput, '  test@example.com  ');
-            fireEvent.changeText(passwordInput, 'password123');
+  describe('Form Validation', () => {
+    it('should show alert when email is empty', async () => {
+      render(<LoginScreen />);
 
-            const signInButton = screen.getByText('Sign in');
-            fireEvent.press(signInButton);
+      const passwordInput = screen.getByPlaceholderText('Password');
+      fireEvent.changeText(passwordInput, 'password123');
 
-            await waitFor(() => {
-                expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'password123');
-            });
-        });
+      const signInButton = screen.getByText('Sign in');
+      fireEvent.press(signInButton);
 
-        it('should navigate to tabs on successful sign in', async () => {
-            mockSignIn.mockResolvedValue(undefined);
+      await waitFor(() => {
+        expect(Alert.alert).toHaveBeenCalledWith(
+          'Missing fields',
+          'Please enter email and password.',
+        );
+      });
 
-            render(<LoginScreen/>);
-
-            const emailInput = screen.getByPlaceholderText('Email');
-            const passwordInput = screen.getByPlaceholderText('Password');
-
-            fireEvent.changeText(emailInput, 'test@example.com');
-            fireEvent.changeText(passwordInput, 'password123');
-
-            const signInButton = screen.getByText('Sign in');
-            fireEvent.press(signInButton);
-
-            await waitFor(() => {
-                expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
-            });
-        });
-
-        it('should show error alert on sign in failure', async () => {
-            const errorMessage = 'Invalid credentials';
-            mockSignIn.mockRejectedValue({
-                response: {
-                    data: {
-                        message: errorMessage
-                    }
-                }
-            });
-
-            render(<LoginScreen/>);
-
-            const emailInput = screen.getByPlaceholderText('Email');
-            const passwordInput = screen.getByPlaceholderText('Password');
-
-            fireEvent.changeText(emailInput, 'test@example.com');
-            fireEvent.changeText(passwordInput, 'wrongpassword');
-
-            const signInButton = screen.getByText('Sign in');
-            fireEvent.press(signInButton);
-
-            await waitFor(() => {
-                expect(Alert.alert).toHaveBeenCalledWith('Error', errorMessage);
-            });
-
-            expect(mockReplace).not.toHaveBeenCalled();
-        });
-
-        it('should show default error message when no error message in response', async () => {
-            mockSignIn.mockRejectedValue(new Error('Network error'));
-
-            render(<LoginScreen/>);
-
-            const emailInput = screen.getByPlaceholderText('Email');
-            const passwordInput = screen.getByPlaceholderText('Password');
-
-            fireEvent.changeText(emailInput, 'test@example.com');
-            fireEvent.changeText(passwordInput, 'password123');
-
-            const signInButton = screen.getByText('Sign in');
-            fireEvent.press(signInButton);
-
-            await waitFor(() => {
-                expect(Alert.alert).toHaveBeenCalledWith('Error', 'Login failed. Please try again.');
-            });
-        });
-
-        it.skip('should disable sign in button when status is loading', () => {
-            // Skipped: TouchableOpacity text rendering issue in tests
-        });
+      expect(mockSignIn).not.toHaveBeenCalled();
     });
 
-    describe('Edge Cases', () => {
-        it('should handle email with special characters', async () => {
-            mockSignIn.mockResolvedValue(undefined);
+    it('should show alert when password is empty', async () => {
+      render(<LoginScreen />);
 
-            render(<LoginScreen/>);
+      const emailInput = screen.getByPlaceholderText('Email');
+      fireEvent.changeText(emailInput, 'test@example.com');
 
-            const emailInput = screen.getByPlaceholderText('Email');
-            const passwordInput = screen.getByPlaceholderText('Password');
+      const signInButton = screen.getByText('Sign in');
+      fireEvent.press(signInButton);
 
-            fireEvent.changeText(emailInput, 'test+user@example.com');
-            fireEvent.changeText(passwordInput, 'password123');
+      await waitFor(() => {
+        expect(Alert.alert).toHaveBeenCalledWith(
+          'Missing fields',
+          'Please enter email and password.',
+        );
+      });
 
-            const signInButton = screen.getByText('Sign in');
-            fireEvent.press(signInButton);
-
-            await waitFor(() => {
-                expect(mockSignIn).toHaveBeenCalledWith('test+user@example.com', 'password123');
-            });
-        });
-
-        it('should handle password with special characters', async () => {
-            mockSignIn.mockResolvedValue(undefined);
-
-            render(<LoginScreen/>);
-
-            const emailInput = screen.getByPlaceholderText('Email');
-            const passwordInput = screen.getByPlaceholderText('Password');
-
-            fireEvent.changeText(emailInput, 'test@example.com');
-            fireEvent.changeText(passwordInput, 'P@ssw0rd!@#$%');
-
-            const signInButton = screen.getByText('Sign in');
-            fireEvent.press(signInButton);
-
-            await waitFor(() => {
-                expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'P@ssw0rd!@#$%');
-            });
-        });
-
-        it('should handle very long inputs', async () => {
-            mockSignIn.mockResolvedValue(undefined);
-
-            render(<LoginScreen/>);
-
-            const emailInput = screen.getByPlaceholderText('Email');
-            const passwordInput = screen.getByPlaceholderText('Password');
-
-            const longEmail = 'a'.repeat(100) + '@example.com';
-            const longPassword = 'password'.repeat(50);
-
-            fireEvent.changeText(emailInput, longEmail);
-            fireEvent.changeText(passwordInput, longPassword);
-
-            const signInButton = screen.getByText('Sign in');
-            fireEvent.press(signInButton);
-
-            await waitFor(() => {
-                expect(mockSignIn).toHaveBeenCalledWith(longEmail, longPassword);
-            });
-        });
+      expect(mockSignIn).not.toHaveBeenCalled();
     });
+
+    it('should show alert when both fields are empty', async () => {
+      render(<LoginScreen />);
+
+      const signInButton = screen.getByText('Sign in');
+      fireEvent.press(signInButton);
+
+      await waitFor(() => {
+        expect(Alert.alert).toHaveBeenCalledWith(
+          'Missing fields',
+          'Please enter email and password.',
+        );
+      });
+
+      expect(mockSignIn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Sign In Flow', () => {
+    it('should call signIn with trimmed email and password', async () => {
+      mockSignIn.mockResolvedValue(undefined);
+
+      render(<LoginScreen />);
+
+      const emailInput = screen.getByPlaceholderText('Email');
+      const passwordInput = screen.getByPlaceholderText('Password');
+
+      fireEvent.changeText(emailInput, '  test@example.com  ');
+      fireEvent.changeText(passwordInput, 'password123');
+
+      const signInButton = screen.getByText('Sign in');
+      fireEvent.press(signInButton);
+
+      await waitFor(() => {
+        expect(mockSignIn).toHaveBeenCalledWith(
+          'test@example.com',
+          'password123',
+        );
+      });
+    });
+
+    it('should navigate to tabs on successful sign in', async () => {
+      mockSignIn.mockResolvedValue(undefined);
+
+      render(<LoginScreen />);
+
+      const emailInput = screen.getByPlaceholderText('Email');
+      const passwordInput = screen.getByPlaceholderText('Password');
+
+      fireEvent.changeText(emailInput, 'test@example.com');
+      fireEvent.changeText(passwordInput, 'password123');
+
+      const signInButton = screen.getByText('Sign in');
+      fireEvent.press(signInButton);
+
+      await waitFor(() => {
+        expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
+      });
+    });
+
+    it('should show error alert on sign in failure', async () => {
+      const errorMessage = 'Invalid credentials';
+      mockSignIn.mockRejectedValue({
+        response: {
+          data: {
+            message: errorMessage,
+          },
+        },
+      });
+
+      render(<LoginScreen />);
+
+      const emailInput = screen.getByPlaceholderText('Email');
+      const passwordInput = screen.getByPlaceholderText('Password');
+
+      fireEvent.changeText(emailInput, 'test@example.com');
+      fireEvent.changeText(passwordInput, 'wrongpassword');
+
+      const signInButton = screen.getByText('Sign in');
+      fireEvent.press(signInButton);
+
+      await waitFor(() => {
+        expect(Alert.alert).toHaveBeenCalledWith('Error', errorMessage);
+      });
+
+      expect(mockReplace).not.toHaveBeenCalled();
+    });
+
+    it('should show default error message when no error message in response', async () => {
+      mockSignIn.mockRejectedValue(new Error('Network error'));
+
+      render(<LoginScreen />);
+
+      const emailInput = screen.getByPlaceholderText('Email');
+      const passwordInput = screen.getByPlaceholderText('Password');
+
+      fireEvent.changeText(emailInput, 'test@example.com');
+      fireEvent.changeText(passwordInput, 'password123');
+
+      const signInButton = screen.getByText('Sign in');
+      fireEvent.press(signInButton);
+
+      await waitFor(() => {
+        expect(Alert.alert).toHaveBeenCalledWith(
+          'Error',
+          'Login failed. Please try again.',
+        );
+      });
+    });
+
+    it.skip('should disable sign in button when status is loading', () => {
+      // Skipped: TouchableOpacity text rendering issue in tests
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle email with special characters', async () => {
+      mockSignIn.mockResolvedValue(undefined);
+
+      render(<LoginScreen />);
+
+      const emailInput = screen.getByPlaceholderText('Email');
+      const passwordInput = screen.getByPlaceholderText('Password');
+
+      fireEvent.changeText(emailInput, 'test+user@example.com');
+      fireEvent.changeText(passwordInput, 'password123');
+
+      const signInButton = screen.getByText('Sign in');
+      fireEvent.press(signInButton);
+
+      await waitFor(() => {
+        expect(mockSignIn).toHaveBeenCalledWith(
+          'test+user@example.com',
+          'password123',
+        );
+      });
+    });
+
+    it('should handle password with special characters', async () => {
+      mockSignIn.mockResolvedValue(undefined);
+
+      render(<LoginScreen />);
+
+      const emailInput = screen.getByPlaceholderText('Email');
+      const passwordInput = screen.getByPlaceholderText('Password');
+
+      fireEvent.changeText(emailInput, 'test@example.com');
+      fireEvent.changeText(passwordInput, 'P@ssw0rd!@#$%');
+
+      const signInButton = screen.getByText('Sign in');
+      fireEvent.press(signInButton);
+
+      await waitFor(() => {
+        expect(mockSignIn).toHaveBeenCalledWith(
+          'test@example.com',
+          'P@ssw0rd!@#$%',
+        );
+      });
+    });
+
+    it('should handle very long inputs', async () => {
+      mockSignIn.mockResolvedValue(undefined);
+
+      render(<LoginScreen />);
+
+      const emailInput = screen.getByPlaceholderText('Email');
+      const passwordInput = screen.getByPlaceholderText('Password');
+
+      const longEmail = 'a'.repeat(100) + '@example.com';
+      const longPassword = 'password'.repeat(50);
+
+      fireEvent.changeText(emailInput, longEmail);
+      fireEvent.changeText(passwordInput, longPassword);
+
+      const signInButton = screen.getByText('Sign in');
+      fireEvent.press(signInButton);
+
+      await waitFor(() => {
+        expect(mockSignIn).toHaveBeenCalledWith(longEmail, longPassword);
+      });
+    });
+  });
 });

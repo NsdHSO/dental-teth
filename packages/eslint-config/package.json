@@ -1,11 +1,14 @@
 {
-  "name": "@yuhuu/eslint-config",
+  "name": "@dental/eslint-config",
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
   "files": [
     "index.js"
   ],
+  "dependencies": {
+    "eslint-plugin-unused-imports": "^4.1.4"
+  },
   "peerDependencies": {
     "eslint": "^9.0.0",
     "eslint-config-expo": "~10.0.0"

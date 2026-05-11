@@ -1,4 +1,4 @@
-import {Colors} from '@yuhuu/components';
+import { Colors } from '@dental/components';
 
 export const getInputStyles = (scheme: 'light' | 'dark') => ({
   container: {

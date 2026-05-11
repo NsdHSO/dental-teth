@@ -4,9 +4,9 @@ import {Alert} from 'react-native';
 import LoginScreen from '../login';
 import {AuthProvider} from '@/providers/AuthProvider';
 import {useRouter} from 'expo-router';
-import * as auth from '@yuhuu/auth';
+import * as auth from '@dental/auth';
 import * as secureStore from '@/lib/secureStore';
-import {initI18n} from '@yuhuu/i18n';
+import {initI18n} from '@dental/i18n';
 
 /**
  * Edge Case Integration Tests for Biometric Login Flow
@@ -28,7 +28,7 @@ jest.mock('expo-router', () => ({
     useRouter: jest.fn(),
 }));
 
-jest.mock('@yuhuu/auth', () => ({
+jest.mock('@dental/auth', () => ({
     isBiometricAvailable: jest.fn(),
     authenticateWithBiometrics: jest.fn(),
     getBiometricPreference: jest.fn(),

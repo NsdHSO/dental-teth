@@ -1,5 +1,5 @@
 {
-  "name": "@yuhuu/components",
+  "name": "@dental/components",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",
@@ -35,17 +35,17 @@
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.2.8",
-    "@yuhuu/auth": "workspace:*",
-    "@yuhuu/i18n": "workspace:*",
-    "@yuhuu/storage": "workspace:*",
-    "@yuhuu/types": "workspace:*",
+    "@dental/auth": "workspace:*",
+    "@dental/i18n": "workspace:*",
+    "@dental/storage": "workspace:*",
+    "@dental/types": "workspace:*",
     "react-native-svg": "^15.15.3"
   },
   "devDependencies": {
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^13.3.3",
     "@types/jest": "^30.0.0",
-    "@yuhuu/tsconfig": "workspace:*",
+    "@dental/tsconfig": "workspace:*",
     "babel-jest": "^29.7.0",
     "babel-preset-expo": "~13.0.0",
     "jest": "^29.7.0",

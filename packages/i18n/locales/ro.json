@@ -69,11 +69,57 @@
     "biometricDisableError": "Dezactivarea autentific\u0103rii biometrice a e\u0219uat.",
     "biometricAuthFailed": "Nu s-a putut verifica identitatea. Te rug\u0103m s\u0103 \u00eencerci din nou.",
     "personalInfo": "Informa\u021bii personale",
-    "churchDetails": "Detalii biseric\u0103",
-    "noChurchDetails": "Nu exist\u0103 detalii despre biseric\u0103",
     "settings": "Set\u0103ri",
     "glowTheme": "Culoare tem\u0103",
     "noName": "Nume nesetat"
+  },
+  "appointments": {
+    "title": "Program\u0103ri",
+    "bookNew": "Programare Nou\u0103",
+    "addAppointment": "Adaug\u0103 programare",
+    "upcoming": "Viitoare",
+    "past": "Trecute",
+    "noAppointments": "Nu exist\u0103 program\u0103ri",
+    "confirmBooking": "Confirm\u0103 Programarea",
+    "bookingSuccess": "Programare confirmat\u0103 cu succes!",
+    "bookingError": "Programarea a e\u0219uat",
+    "cancelAppointment": "Anuleaz\u0103 Programarea",
+    "cancelSuccess": "Programare anulat\u0103",
+    "dateRequired": "Data este obligatorie",
+    "timeRequired": "Ora este obligatorie",
+    "dentistRequired": "Selecteaz\u0103 un medic dentist",
+    "selectDate": "Selecteaz\u0103 Data",
+    "selectTime": "Selecteaz\u0103 Ora",
+    "selectDentist": "Selecteaz\u0103 Medicul",
+    "reason": "Motivul Vizitei",
+    "reasonPlaceholder": "Descrie\u0219te problema ta dentar\u0103",
+    "form": {
+      "title": "Programare nou\u0103",
+      "datePlaceholder": "Data (AAAA-LL-ZZ)",
+      "timePlaceholder": "Ora (HH:mm)",
+      "dentistPlaceholder": "Medic dentist",
+      "reasonPlaceholder": "Motiv",
+      "create": "Creeaz\u0103",
+      "pickTime": "Alege o or\u0103",
+      "morning": "Diminea\u021ba",
+      "afternoon": "Dup\u0103-amiaza",
+      "custom": "Personalizat",
+      "customTimePlaceholder": "HH:mm (ex. 13:15)",
+      "clearCustomTime": "\u0218terge ora personalizat\u0103",
+      "invalidDate": "Data trebuie s\u0103 fie \u00een format AAAA-LL-ZZ",
+      "invalidTime": "Alege un interval sau introdu HH:mm",
+      "dentistRequired": "Medicul este obligatoriu",
+      "reasonRequired": "Motivul este obligatoriu"
+    }
+  },
+  "treatments": {
+    "title": "Tratamente",
+    "history": "Istoricul Tratamentelor",
+    "noHistory": "Nu exist\u0103 istoric de tratamente",
+    "date": "Data",
+    "dentist": "Medic Dentist",
+    "procedure": "Procedur\u0103",
+    "notes": "Note"
   },
   "supper": {
     "title": "Cin\u0103",
@@ -105,11 +151,18 @@
     "locationPlaceholder": "Loca\u021bie (op\u021bional)",
     "maxParticipantsPlaceholder": "Participan\u021bi maximi (op\u021bional)"
   },
-  "home": {
+"home": {
     "title": "Acas\u0103",
     "welcome": "Bine ai venit, {{name}}!",
-    "welcomeMessage": "Bine ai venit \u00een comunitatea noastr\u0103 pentecostal\u0103",
-    "encouragement": "Ne bucur\u0103m c\u0103 e\u0219ti aici\u2014fie ca s\u0103 te sim\u021bi \u00eencurajat \u00een timp ce ne \u00eenchin\u0103m, ne rug\u0103m \u0219i cre\u0219tem \u00eempreun\u0103 \u00een Cristos.",
+    "welcomeMessage": "Tabloul t\u0103u de asisten\u021b\u0103 dentar\u0103",
+    "encouragement": "Gestioneaz\u0103 program\u0103ri, urm\u0103re\u0219te tratamentele \u0219i men\u021bine controlul s\u0103n\u0103t\u0103\u021bii orale\u2014totul \u00eentr-un singur loc.",
+    "upcomingAppointments": "Program\u0103ri Viitoare",
+    "noAppointments": "Nu exist\u0103 program\u0103ri viitoare",
+    "recentTreatments": "Tratamente Recente",
+    "noTreatments": "Nu exist\u0103 tratamente recente",
+    "quickActions": "Ac\u021biuni Rapide",
+    "bookAppointment": "Programare",
+    "viewRecords": "Vezi Eviden\u021ba",
     "signOut": "Deconectare"
   },
   "admin": {
@@ -168,114 +221,10 @@
     "notesPlaceholder": "Note (op\u021bional)",
     "adding": "Se adaug\u0103\u2026",
     "addParticipant": "Adaug\u0103 participant",
-    "creating": "Se creaz\u0103..."
-  },
-  "family": {
-    "title": "👨‍👩‍👧‍👦 Rela\u021bii de Familie",
-    "deleteTitle": "\u0218terge membru al familiei",
-    "deleteMessage": "\u0218tergi pe {{name}}?",
-    "deleteSuccess": "Membru al familiei \u0219ters",
-    "thisMember": "acest membru",
-    "emptyState": "Nu au fost ad\u0103ugate \u00eenc\u0103 rela\u021bii de familie",
-    "addButton": "Adaug\u0103 membru al familiei",
-    "editButton": "Editeaz\u0103",
-    "createSuccess": "Membru al familiei ad\u0103ugat",
-    "updateSuccess": "Membru al familiei actualizat",
-    "createError": "Ad\u0103ugarea membrului familiei a e\u0219uat",
-    "updateError": "Actualizarea membrului familiei a e\u0219uat",
-    "fields": {
-      "relationshipType": "Tip rela\u021bie",
-      "relatedPersonName": "Nume",
-      "relatedPersonNamePlaceholder": "Introdu numele",
-      "relatedPersonDob": "Data na\u0219terii",
-      "relatedPersonPhone": "Telefon",
-      "relatedPersonPhonePlaceholder": "Introdu num\u0103rul de telefon",
-      "relatedPersonEmail": "Email",
-      "relatedPersonEmailPlaceholder": "Introdu adresa de email"
-    },
-    "relationshipTypes": {
-      "spouse": "So\u021b/So\u021bie",
-      "child": "Copil",
-      "parent": "P\u0103rinte",
-      "sibling": "Frate/Sor\u0103"
-    },
-    "errors": {
-      "nameRequired": "Numele este obligatoriu",
-      "invalidEmail": "Te rug\u0103m s\u0103 introduci o adres\u0103 de email valid\u0103"
-    }
-  },
-  "milestones": {
-    "title": "✨ Repere Spirituale",
-    "deleteTitle": "\u0218terge reper",
-    "deleteMessage": "\u0218tergi {{type}}?",
-    "deleteSuccess": "Reper \u0219ters",
-    "emptyState": "Nu au fost ad\u0103ugate \u00eenc\u0103 repere spirituale",
-    "addButton": "Adaug\u0103 reper",
-    "editButton": "Editeaz\u0103",
-    "createSuccess": "Reper ad\u0103ugat",
-    "updateSuccess": "Reper actualizat",
-    "createError": "Ad\u0103ugarea reperului a e\u0219uat",
-    "updateError": "Actualizarea reperului a e\u0219uat",
-    "duplicateError": "Ai deja un reper de acest tip",
-    "fields": {
-      "milestoneType": "Tip reper",
-      "milestoneDate": "Data",
-      "location": "Loca\u021bie",
-      "locationPlaceholder": "Introdu loca\u021bia",
-      "officiant": "Oficiant",
-      "officiantPlaceholder": "Introdu numele oficiantului",
-      "notes": "Note",
-      "notesPlaceholder": "Introdu note"
-    },
-    "milestoneTypes": {
-      "conversion": "Convertire",
-      "baptism": "Botez",
-      "water_baptism": "Botez \u00een ap\u0103",
-      "spirit_baptism": "Botezul Duhului",
-      "confirmation": "Confirmare",
-      "dedication": "Dedicare",
-      "ordination": "Ordinare"
-    },
-    "errors": {
-      "typeRequired": "Tipul reperului este obligatoriu"
-    }
-  },
-  "membership": {
-    "title": "⛪ Istoric Membre",
-    "deleteTitle": "\u0218terge \u00eenregistrare de membru",
-    "deleteMessage": "\u0218tergi apartenența la {{churchName}}?",
-    "deleteSuccess": "\u00cenregistrare de membru \u0219tears\u0103",
-    "active": "Activ",
-    "emptyState": "Nu a fost ad\u0103ugat \u00eenc\u0103 istoric de membre",
-    "addButton": "Adaug\u0103 \u00eenregistrare",
-    "editButton": "Editeaz\u0103",
-    "createSuccess": "\u00cenregistrare de membru ad\u0103ugat\u0103",
-    "updateSuccess": "\u00cenregistrare de membru actualizat\u0103",
-    "createError": "Ad\u0103ugarea \u00eenregistr\u0103rii a e\u0219uat",
-    "updateError": "Actualizarea \u00eenregistr\u0103rii a e\u0219uat",
-    "duplicateActiveError": "Ai deja o apartenent\u0103 activ\u0103. Te rug\u0103m s\u0103 o \u00eenchei \u00eenainte de a ad\u0103uga una nou\u0103.",
-    "fields": {
-      "churchName": "Numele bisericii",
-      "churchNamePlaceholder": "Introdu numele bisericii",
-      "startDate": "Data \u00eenceputului",
-      "endDate": "Data sf\u00e2r\u0219itului",
-      "endDateHint": "Las\u0103 gol pentru apartenent\u0103 activ\u0103",
-      "transferType": "Tip transfer",
-      "previousRole": "Rolul anterior",
-      "previousRolePlaceholder": "Introdu rolul anterior",
-      "transferLetterReceived": "Scrisoare de transfer primit\u0103",
-      "notes": "Note",
-      "notesPlaceholder": "Introdu note"
-    },
-    "transferTypes": {
-      "transfer_in": "Transfer intrare",
-      "transfer_out": "Transfer ie\u0219ire",
-      "new_member": "Membru nou",
-      "restored": "Restaurat"
-    },
-    "errors": {
-      "churchNameRequired": "Numele bisericii este obligatoriu"
-    }
+    "creating": "Se creaz\u0103...",
+    "back": "\u00cenapoi",
+    "confirm": "Confirm\u0103",
+    "retry": "Re\u00eencercare"
   },
   "skills": {
     "title": "🎯 Abilit\u0103\u021bi & Talente",
@@ -319,10 +268,10 @@
       "skillNameRequired": "Numele abilit\u0103\u021bii este obligatoriu"
     }
   },
-  "church": {
-    "information": "Informa\u021bii Biserice\u0219ti",
-    "title": "Detalii Biserice\u0219ti",
-    "placeholder": "Detaliile bisericii vor fi disponibile \u00een cur\u00e2nd"
+  "dentists": {
+    "available": "Disponibil",
+    "unavailable": "Indisponibil",
+    "noResults": "Nu s-au g\u0103sit medici"
   },
   "modal": {
     "title": "Aceasta este o fereastr\u0103 modal\u0103",
@@ -333,7 +282,10 @@
     "admin": "Admin",
     "visits": "Vizite",
     "supper": "Cin\u0103",
-    "profile": "Profil"
+    "profile": "Profil",
+    "appointments": "Program\u0103ri",
+    "patients": "Pacien\u021bi",
+    "dentists": "Medici"
   },
   "visits": {
     "title": "Vizite",
@@ -363,5 +315,8 @@
     "male": "Bărbat",
     "female": "Femeie",
     "modalTitle": "Selectează Genul Tău"
+  },
+  "avatar": {
+    "modalTitle": "Set\u0103ri"
   }
 }

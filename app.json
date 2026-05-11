@@ -1,8 +1,8 @@
 {
   "ios": {
-    "bundleIdentifier": "com.anonymous.yuhuu"
+    "bundleIdentifier": "com.anonymous.dental"
   },
   "android": {
-    "package": "com.anonymous.yuhuu"
+    "package": "com.anonymous.dental"
   }
 }

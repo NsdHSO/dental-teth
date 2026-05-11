@@ -1,5 +1,5 @@
 {
-  "name": "@yuhuu/auth",
+  "name": "@dental/auth",
   "version": "0.0.0",
   "private": true,
   "main": "./dist/index.js",
@@ -26,8 +26,8 @@
     "test:coverage": "jest --coverage --passWithNoTests"
   },
   "dependencies": {
-    "@yuhuu/storage": "workspace:*",
-    "@yuhuu/http": "workspace:*",
+    "@dental/storage": "workspace:*",
+    "@dental/http": "workspace:*",
     "axios": "^1.13.5",
     "jwt-decode": "^4.0.0"
   },
@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@yuhuu/tsconfig": "workspace:*",
+    "@dental/tsconfig": "workspace:*",
     "babel-jest": "^29.7.0",
     "babel-preset-expo": "~13.0.0",
     "jest": "^29.7.0",
