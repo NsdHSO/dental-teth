@@ -227,16 +227,25 @@ export function AppointmentDetailScreen() {
           );
         })}
 
-        <Pressable onPress={handleAddAttachment} style={styles.addButton}>
-          <IconSymbol name='plus' size={18} color='#1E40AF' />
-          <ThemedText
-            type='default'
-            weight='semibold'
-            style={styles.addButtonText}
-          >
-            {t('attachments.add', 'Add attachment')}
-          </ThemedText>
-        </Pressable>
+        {uploadMutation.isPending ? (
+          <View style={styles.uploadingRow}>
+            <ActivityIndicator size='small' color='#1E40AF' />
+            <ThemedText type='default' style={styles.uploadingText}>
+              {t('attachments.uploading', 'Uploading...')}
+            </ThemedText>
+          </View>
+        ) : (
+          <Pressable onPress={handleAddAttachment} style={styles.addButton}>
+            <IconSymbol name='plus' size={18} color='#1E40AF' />
+            <ThemedText
+              type='default'
+              weight='semibold'
+              style={styles.addButtonText}
+            >
+              {t('attachments.add', 'Add attachment')}
+            </ThemedText>
+          </Pressable>
+        )}
         <AttachmentPickerSheet
           ref={sheetRef}
           onSelect={handleFileSelected}
@@ -347,6 +356,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   addButtonText: {
+    color: '#1E40AF',
+  },
+  uploadingRow: {
+    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+  },
+  uploadingText: {
     color: '#1E40AF',
   },
 });
